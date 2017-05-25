@@ -17,7 +17,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#define BACKLOG 10	 // how many pending connections queue will hold
+//#define BACKLOG 10	 // how many pending connections queue will hold
 
 void catchSIGINT(int signo) {
 	//foreground signal terminates self
@@ -79,27 +79,30 @@ int main(int argc, char *argv[]) {
     }
 
     // loop through all the results and bind to the first we can
-	for(p = servinfo; p != NULL; p = p->ai_next) {
-		if ((sockfd = socket(p->ai_family, p->ai_socktype,
-				p->ai_protocol)) == -1) {
+	//for(p = servinfo; p != NULL; p = p->ai_next) {
+    
+		if ((sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
+				servinfo->ai_protocol)) == -1) {
 			perror("server: socket");
-			continue;
+			//continue;
 		}
-
+/*
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
 				sizeof(int)) == -1) {
 			perror("setsockopt");
 			exit(1);
 		}
+		*/
 
-		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+		//if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+    if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
 			close(sockfd);
 			perror("server: bind");
-			continue;
+			//continue;
 		}
 
-		break;
-	}
+		//break;
+	//}
 
 
 	freeaddrinfo(servinfo); // all done with this structure
@@ -109,10 +112,11 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	if (listen(sockfd, BACKLOG) == -1) {
+	if (listen(sockfd, 1) == -1) {
 		perror("listen");
 		exit(1);
 	}
+
 
 	sa.sa_handler = sigchld_handler; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
