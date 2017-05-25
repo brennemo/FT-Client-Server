@@ -8,6 +8,20 @@ import sys
 
 
 if __name__ == "__main__":
+
+    if len(sys.argv) < 3:
+    print "USAGE: ./chatserve <port #>"
+    exit(1)
+
+	#https://docs.python.org/2/library/socket.html
+    HOST = int(argv[1])                 
+    PORT = int(argv[len(sys.argv)])   
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((HOST, PORT))
+	s.sendall('Hello, world')
+	data = s.recv(1024)
+	s.close()
+	print 'Received', repr(data)
 	#start on host B 
 
 	#validate command line parameters 

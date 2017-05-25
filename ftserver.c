@@ -11,6 +11,14 @@
 #include <netdb.h> 
 #include <netinet/in.h>
 
+void catchSIGINT(int signo) {
+	//foreground signal terminates self
+		puts("\nForeground signal terminating.\n");				
+		fflush(stdout);
+		
+		exit(0);
+	}
+
 void sigchld_handler(int s) {
 	// waitpid() might overwrite errno, so we save and restore it:
 	int saved_errno = errno;
@@ -25,7 +33,19 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 int main(int argc, char *argv[]) {
+	/*
+	struct sigaction SIGINT_action = { 0 };
 
+	//initialize signal handlers 
+	SIGINT_action.sa_handler = catchSIGINT;
+	sigfillset(&SIGINT_action.sa_mask);
+	SIGINT_action.sa_flags = 0; 
+
+	//assign behaviors to override default actions 
+	sigaction(SIGINT, &SIGINT_action, NULL);
+	*/
+
+	//http://beej.us/guide/bgnet/examples/server.c
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo, *p;
     struct sockaddr_storage their_addr; // connector's address information
@@ -40,7 +60,12 @@ int main(int argc, char *argv[]) {
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
 
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
+	char *port;
+
+    if (argc != 2) { fprintf(stderr,"USAGE: ./chatclient <server-hostname> <port #>\n"); exit(1); } 
+	port = argv[1];
+
+    if ((rv = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
