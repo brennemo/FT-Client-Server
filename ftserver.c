@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <dirent.h>	
 
 //#define BACKLOG 10	 // how many pending connections queue will hold
 
@@ -27,19 +28,85 @@ void catchSIGINT(int signo) {
 		exit(0);
 	}
 
-/*
-void sigchld_handler(int s) {
-	// waitpid() might overwrite errno, so we save and restore it:
-	int saved_errno = errno;
-
-	while(waitpid(-1, NULL, WNOHANG) > 0);
-
-	errno = saved_errno;
-}
-*/
 
 void *get_in_addr(struct sockaddr *sa) {
 	return &(((struct sockaddr_in*)sa)->sin_addr);
+}
+
+struct addrinfo* fillAddrStruct(char *port) { 
+	//int new_fd;  // listen on sock_fd, new connection on new_fd
+    struct addrinfo hints, *servinfo; //*p;
+    struct sockaddr_storage their_addr; // connector's address information
+    //socklen_t sin_size;
+    struct sigaction sa;
+    //int yes=1;
+    //char s[INET_ADDRSTRLEN];
+    int rv;
+
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE; // use my IP	
+
+
+    if ((rv = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        exit(1);
+    }
+
+    return servinfo;
+}
+
+int openServer(struct addrinfo *servinfo) {
+	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
+    //struct addrinfo hints; //*servinfo; *p;
+    //struct sockaddr_storage their_addr; // connector's address information
+    //socklen_t sin_size;
+    //struct sigaction sa;
+    //int yes=1;
+    //char s[INET_ADDRSTRLEN];
+    //int rv;
+
+	if ((sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
+		servinfo->ai_protocol)) == -1) {
+		perror("server: socket");
+	//continue;
+	}
+
+
+	//if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+	//bind socket 
+	if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+		close(sockfd);
+		perror("server: bind");
+		exit(1);
+		//continue;
+	}
+
+    return sockfd; 
+}
+
+void getFileNames() {
+	char* fileNames[1000];	
+	int i;
+	DIR *dp;
+	struct dirent *ep;
+
+	dp = opendir("./");
+	if (dp != NULL)
+	{
+		i = 0;
+		while (ep = readdir(dp)) {
+			fileNames[i] = ep->d_name;
+			printf("%s ", fileNames[i]);
+			i++;
+		}
+		(void)closedir(dp);
+	}
+	else {
+		perror("Couldn't read the directory");
+		exit(1);
+	}
 }
 
 int main(int argc, char *argv[]) {
@@ -58,30 +125,40 @@ int main(int argc, char *argv[]) {
 	//http://beej.us/guide/bgnet/examples/server.c
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo; //*p;
+    
     struct sockaddr_storage their_addr; // connector's address information
     socklen_t sin_size;
-    struct sigaction sa;
-    int yes=1;
+    //struct sigaction sa;
+    //int yes=1;
     char s[INET_ADDRSTRLEN];
-    int rv;
+    //int rv;
+    
 
+    /*
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
-
+	*/
 	//char *port;
+
+
 
     //validate command line parameters
     if (argc != 2) { fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); } 
 	//port = argv[1];
 
     //fill struct 
+    /*
     if ((rv = getaddrinfo(NULL, argv[1], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
+    */
 
+    servinfo = fillAddrStruct(argv[1]);
+
+    /*
     //create socket 
 	if ((sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
 			servinfo->ai_protocol)) == -1) {
@@ -98,6 +175,8 @@ int main(int argc, char *argv[]) {
 		exit(1);
 		//continue;
 	}
+	*/
+	sockfd = openServer(servinfo);
 
 	freeaddrinfo(servinfo); // all done with this structure
 
@@ -111,16 +190,6 @@ int main(int argc, char *argv[]) {
 		perror("listen");
 		exit(1);
 	}
-
-	/*
-	sa.sa_handler = sigchld_handler; // reap all dead processes
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-	if (sigaction(SIGCHLD, &sa, NULL) == -1) {
-		perror("sigaction");
-		exit(1);
-	}
-	*/
 
 	//start on host A
 	printf("Server open on %s\n", argv[1]);
@@ -159,6 +228,7 @@ int main(int argc, char *argv[]) {
 				//initiate TCP data connection with ftclient on <DATA_PORT>, i.e., connection Q 
 					//if command from ftclient == "-l"
 					printf("Sending directory contents to %s:%s\n", placeholderHost, placeholderPort);
+					getFileNames();
 					
 					//if command from ftclient == "-g <FiLENAME>"
 						//validate FILENAME 
@@ -169,24 +239,17 @@ int main(int argc, char *argv[]) {
 						//send contents of FILENAME on connection Q
 						printf("File \"%s\" requested on port %s.\n", placeholderFile, placeholderPort);
 						printf("Sending \"%s\" to %s:%s\n", placeholderFile, placeholderHost, placeholderPort); 
+
+						//loop to send whole file 
 						
 
 				//close connection Q
-		/*
-		if (!fork()) { // this is the child process
-			close(sockfd); // child doesn't need the listener
-			if (send(new_fd, "Hello, world!", 13, 0) == -1)
-				perror("send");
-			close(new_fd);
-			exit(0);
-		}
-		*/
 
 
 		//close connection P and terminate
 		close(new_fd);  // parent doesn't need this
 	}
-
+	
 	return 0;
 }
 
