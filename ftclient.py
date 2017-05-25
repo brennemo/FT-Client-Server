@@ -9,13 +9,13 @@ import sys
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 3:
-    print "USAGE: ./chatserve <port #>"
-    exit(1)
+	#if len(sys.argv) < 3:
+	#print "USAGE: ./chatserve <port #>"
+	#exit(1)
 
 	#https://docs.python.org/2/library/socket.html
-    HOST = int(argv[1])                 
-    PORT = int(argv[len(sys.argv)])   
+	HOST = sys.argv[1]
+	PORT = int(sys.argv[len(sys.argv)-1])   
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((HOST, PORT))
 	s.sendall('Hello, world')
