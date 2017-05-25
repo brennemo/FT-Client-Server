@@ -1,16 +1,26 @@
-#start on host B 
+# Morgan Brenner
+# brennemo@oregonstate.edu 
+# CS 372 Program 2
 
-#validate command line parameters 
+import signal 
+import socket
+import sys
 
-#establish TCP control connection on <SERVER_PORT>, i.e., connection P
 
-#send command (-l (list) or -g <FILENAME> (get)) on connection P 
+if __name__ == "__main__":
+	#start on host B 
 
-	#invalid command: display error message from connection P
+	#validate command line parameters 
 
-	#valid command: TCP data connection with ftserver on <DATA_PORT>, i.e., connection Q 
+	#establish TCP control connection on <SERVER_PORT>, i.e., connection P
 
-			#receive error message on connection P and display 
-			#save file received on connection Q in current default directory 
-				#handle duplicate file names
-				#display 'transfer complete' message 
+	#send command (-l (list) or -g <FILENAME> (get)) on connection P 
+
+		#invalid command: display error message from connection P
+
+		#valid command: TCP data connection with ftserver on <DATA_PORT>, i.e., connection Q 
+
+				#receive error message on connection P and display 
+				#save file received on connection Q in current default directory 
+					#handle duplicate file names
+					#display 'transfer complete' message 
