@@ -4,12 +4,20 @@
 ** CS 372 Program 2 
 */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
 #include <string.h>
+#include <sys/types.h>
 #include <sys/socket.h>
-#include <netdb.h> 
 #include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <signal.h>
+
+#define BACKLOG 10	 // how many pending connections queue will hold
 
 void catchSIGINT(int signo) {
 	//foreground signal terminates self
