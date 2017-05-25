@@ -34,13 +34,8 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 struct addrinfo* fillAddrStruct(char *port) { 
-	//int new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo; //*p;
-    struct sockaddr_storage their_addr; // connector's address information
-    //socklen_t sin_size;
     struct sigaction sa;
-    //int yes=1;
-    //char s[INET_ADDRSTRLEN];
     int rv;
 
     memset(&hints, 0, sizeof hints);
@@ -58,19 +53,11 @@ struct addrinfo* fillAddrStruct(char *port) {
 }
 
 int openServer(struct addrinfo *servinfo) {
-	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
-    //struct addrinfo hints; //*servinfo; *p;
-    //struct sockaddr_storage their_addr; // connector's address information
-    //socklen_t sin_size;
-    //struct sigaction sa;
-    //int yes=1;
-    //char s[INET_ADDRSTRLEN];
-    //int rv;
+	int sockfd;  
 
 	if ((sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
 		servinfo->ai_protocol)) == -1) {
 		perror("server: socket");
-	//continue;
 	}
 
 
@@ -80,7 +67,6 @@ int openServer(struct addrinfo *servinfo) {
 		close(sockfd);
 		perror("server: bind");
 		exit(1);
-		//continue;
 	}
 
     return sockfd; 
@@ -125,57 +111,16 @@ int main(int argc, char *argv[]) {
 	//http://beej.us/guide/bgnet/examples/server.c
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo; //*p;
-    
     struct sockaddr_storage their_addr; // connector's address information
     socklen_t sin_size;
-    //struct sigaction sa;
-    //int yes=1;
     char s[INET_ADDRSTRLEN];
-    //int rv;
-    
-
-    /*
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE; // use my IP
-	*/
-	//char *port;
-
-
 
     //validate command line parameters
     if (argc != 2) { fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); } 
-	//port = argv[1];
 
     //fill struct 
-    /*
-    if ((rv = getaddrinfo(NULL, argv[1], &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
-    }
-    */
-
     servinfo = fillAddrStruct(argv[1]);
-
-    /*
-    //create socket 
-	if ((sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
-			servinfo->ai_protocol)) == -1) {
-		perror("server: socket");
-		//continue;
-	}
-
-
-	//if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-	//bind socket 
-	if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-		close(sockfd);
-		perror("server: bind");
-		exit(1);
-		//continue;
-	}
-	*/
+    //create and bind socket 
 	sockfd = openServer(servinfo);
 
 	freeaddrinfo(servinfo); // all done with this structure
@@ -228,7 +173,7 @@ int main(int argc, char *argv[]) {
 				//initiate TCP data connection with ftclient on <DATA_PORT>, i.e., connection Q 
 					//if command from ftclient == "-l"
 					printf("Sending directory contents to %s:%s\n", placeholderHost, placeholderPort);
-					getFileNames();
+					//getFileNames();
 					
 					//if command from ftclient == "-g <FiLENAME>"
 						//validate FILENAME 
@@ -247,7 +192,7 @@ int main(int argc, char *argv[]) {
 
 
 		//close connection P and terminate
-		close(new_fd);  // parent doesn't need this
+		close(new_fd);  /
 	}
 	
 	return 0;
