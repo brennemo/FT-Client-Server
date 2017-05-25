@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 
 	//http://beej.us/guide/bgnet/examples/server.c
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
-    struct addrinfo hints, *servinfo, *p;
+    struct addrinfo hints, *servinfo; //*p;
     struct sockaddr_storage their_addr; // connector's address information
     socklen_t sin_size;
     struct sigaction sa;
@@ -68,12 +68,13 @@ int main(int argc, char *argv[]) {
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
 
-	char *port;
+	//char *port;
 
-    if (argc != 2) { fprintf(stderr,"USAGE: ./chatclient <server-hostname> <port #>\n"); exit(1); } 
-	port = argv[1];
+    //validate command line parameters
+    if (argc != 2) { fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); } 
+	//port = argv[1];
 
-    if ((rv = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(NULL, argv[1], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
@@ -98,6 +99,7 @@ int main(int argc, char *argv[]) {
     if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
 			close(sockfd);
 			perror("server: bind");
+			exit(1);
 			//continue;
 		}
 
@@ -107,7 +109,8 @@ int main(int argc, char *argv[]) {
 
 	freeaddrinfo(servinfo); // all done with this structure
 
-	if (p == NULL)  {
+	//if (p == NULL)  {
+	if (servinfo == NULL) {
 		fprintf(stderr, "server: failed to bind\n");
 		exit(1);
 	}
@@ -126,9 +129,12 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	printf("server: waiting for connections...\n");
+	//start on host A
+	printf("Server open on %s\n", argv[1]);
 
-	while(1) {  // main accept() loop
+	//repeatedly wait on <PORTNUM> for client (until terminated by SIGINT)
+	while(1) {  
+		//wait on connection P for command from ftclient 
 		sin_size = sizeof their_addr;
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
 		if (new_fd == -1) {
@@ -136,10 +142,43 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 
+		//establish TCP control connection on <SERVER_PORT>, i.e., connection P
 		inet_ntop(their_addr.ss_family,
 			get_in_addr((struct sockaddr *)&their_addr),
 			s, sizeof s);
-		printf("server: got connection from %s\n", s);
+		printf("Connection from %s.\n", s);
+
+		//wait on connection P for command from ftclient 
+
+		//receive command on connection P 
+		char* placeholderHost = "flip2";
+		char* placeholderPort = "30020";
+		char* placeholderFile = "shortfile.txt";
+
+		printf("List directory requested on port %s.\n", placeholderHost);
+		
+
+			//if ftclient sent invalid command
+
+				//error message to ftclient on connection P
+
+			//else 
+				//initiate TCP data connection with ftclient on <DATA_PORT>, i.e., connection Q 
+					//if command from ftclient == "-l"
+					printf("Sending directory contents to %s:%s\n", placeholderHost, placeholderPort);
+					
+					//if command from ftclient == "-g <FiLENAME>"
+						//validate FILENAME 
+						//send error message on connection P 
+						printf("File not found. Sending error message to %s:%s\n", placeholderHost, placeholderPort);
+						printf("FILE NOT FOUND\n");
+
+						//send contents of FILENAME on connection Q
+						printf("File \"%s\" requested on port %s.\n", placeholderFile, placeholderPort);
+						printf("Sending \"%s\" to %s:%s\n", placeholderFile, placeholderHost, placeholderPort); 
+						
+
+				//close connection Q
 
 		if (!fork()) { // this is the child process
 			close(sockfd); // child doesn't need the listener
@@ -148,37 +187,11 @@ int main(int argc, char *argv[]) {
 			close(new_fd);
 			exit(0);
 		}
+
+
+		//close connection P and terminate
 		close(new_fd);  // parent doesn't need this
 	}
-
-
-	//start on host A
-
-	//validate command line parameters
-
-	//repeatedly wait on <PORTNUM> for client (until terminated by SIGINT)
-
-	//establish TCP control connection on <SERVER_PORT>, i.e., connection P
-
-	//wait on connection P for command from ftclient 
-
-		//receive command on connection P 
-
-			//if ftclient sent invalid command
-
-				//error message to ftclient on connection P
-
-			//else 
-				//initiate TCP data connection with ftclient on <DATA_PORT>, i.e., connection Q 
-					
-					//if command from ftclient == "-g <FiLENAME>"
-						//validate FILENAME 
-						//send error message on connection P 
-						//send contents of FILENAME on connection Q 
-
-				//close connection Q
-		
-		//close connection P and terminate
 
 	return 0;
 }
