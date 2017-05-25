@@ -27,6 +27,7 @@ void catchSIGINT(int signo) {
 		exit(0);
 	}
 
+/*
 void sigchld_handler(int s) {
 	// waitpid() might overwrite errno, so we save and restore it:
 	int saved_errno = errno;
@@ -35,6 +36,7 @@ void sigchld_handler(int s) {
 
 	errno = saved_errno;
 }
+*/
 
 void *get_in_addr(struct sockaddr *sa) {
 	return &(((struct sockaddr_in*)sa)->sin_addr);
@@ -74,38 +76,28 @@ int main(int argc, char *argv[]) {
     if (argc != 2) { fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); } 
 	//port = argv[1];
 
+    //fill struct 
     if ((rv = getaddrinfo(NULL, argv[1], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
 
-    // loop through all the results and bind to the first we can
-	//for(p = servinfo; p != NULL; p = p->ai_next) {
-    
-		if ((sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
-				servinfo->ai_protocol)) == -1) {
-			perror("server: socket");
-			//continue;
-		}
-/*
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-				sizeof(int)) == -1) {
-			perror("setsockopt");
-			exit(1);
-		}
-		*/
+    //create socket 
+	if ((sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
+			servinfo->ai_protocol)) == -1) {
+		perror("server: socket");
+		//continue;
+	}
 
-		//if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-    if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-			close(sockfd);
-			perror("server: bind");
-			exit(1);
-			//continue;
-		}
 
-		//break;
-	//}
-
+	//if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+	//bind socket 
+	if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+		close(sockfd);
+		perror("server: bind");
+		exit(1);
+		//continue;
+	}
 
 	freeaddrinfo(servinfo); // all done with this structure
 
@@ -120,7 +112,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-
+	/*
 	sa.sa_handler = sigchld_handler; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
@@ -128,6 +120,7 @@ int main(int argc, char *argv[]) {
 		perror("sigaction");
 		exit(1);
 	}
+	*/
 
 	//start on host A
 	printf("Server open on %s\n", argv[1]);
@@ -179,7 +172,7 @@ int main(int argc, char *argv[]) {
 						
 
 				//close connection Q
-
+		/*
 		if (!fork()) { // this is the child process
 			close(sockfd); // child doesn't need the listener
 			if (send(new_fd, "Hello, world!", 13, 0) == -1)
@@ -187,6 +180,7 @@ int main(int argc, char *argv[]) {
 			close(new_fd);
 			exit(0);
 		}
+		*/
 
 
 		//close connection P and terminate
