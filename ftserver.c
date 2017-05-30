@@ -60,8 +60,6 @@ int openServer(struct addrinfo *servinfo) {
 		perror("server: socket");
 	}
 
-
-	//if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
 	//bind socket 
 	if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
 		close(sockfd);
@@ -125,7 +123,6 @@ int main(int argc, char *argv[]) {
 
 	freeaddrinfo(servinfo); // all done with this structure
 
-	//if (p == NULL)  {
 	if (servinfo == NULL) {
 		fprintf(stderr, "server: failed to bind\n");
 		exit(1);
@@ -192,7 +189,7 @@ int main(int argc, char *argv[]) {
 
 
 		//close connection P and terminate
-		close(new_fd);  /
+		close(new_fd);  
 	}
 	
 	return 0;
