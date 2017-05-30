@@ -18,7 +18,7 @@
 #include <signal.h>
 #include <dirent.h>	
 
-//#define BACKLOG 10	 // how many pending connections queue will hold
+#define BUFFER_SIZE 1000
 
 void catchSIGINT(int signo) {
 	//foreground signal terminates self
@@ -52,7 +52,7 @@ struct addrinfo* fillAddrStruct(char *port) {
     return servinfo;
 }
 
-int openServer(struct addrinfo *servinfo) {
+int startup(struct addrinfo *servinfo) {
 	int sockfd;  
 
 	if ((sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
@@ -68,6 +68,24 @@ int openServer(struct addrinfo *servinfo) {
 	}
 
     return sockfd; 
+}
+
+void handleRequest(int new_fd) {
+	char* placeholderHost = "flip2";
+	char* placeholderPort = "30020";
+	char* placeholderFile = "shortfile.txt";
+
+	char buffer[BUFFER_SIZE];
+
+	memset(buffer, '\0', BUFFER_SIZE);
+	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
+
+	printf("List directory requested on port %s.\n", placeholderHost);
+
+	//if command from ftclient == "-l"
+	printf("Sending directory contents to %s:%s\n", placeholderHost, placeholderPort);
+	//getFileNames();
+
 }
 
 void getFileNames() {
@@ -93,6 +111,7 @@ void getFileNames() {
 	}
 }
 
+
 int main(int argc, char *argv[]) {
 	/*
 	struct sigaction SIGINT_action = { 0 };
@@ -113,13 +132,15 @@ int main(int argc, char *argv[]) {
     socklen_t sin_size;
     char s[INET_ADDRSTRLEN];
 
+    char host[1024], service[20];	//getnameinfo
+
     //validate command line parameters
     if (argc != 2) { fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); } 
 
     //fill struct 
     servinfo = fillAddrStruct(argv[1]);
     //create and bind socket 
-	sockfd = openServer(servinfo);
+	sockfd = startup(servinfo);
 
 	freeaddrinfo(servinfo); // all done with this structure
 
@@ -147,13 +168,20 @@ int main(int argc, char *argv[]) {
 		}
 
 		//establish TCP control connection on <SERVER_PORT>, i.e., connection P
-		inet_ntop(their_addr.ss_family,
+		inet_ntop(their_addr.ss_family,						//get IP address 
 			get_in_addr((struct sockaddr *)&their_addr),
 			s, sizeof s);
-		printf("Connection from %s.\n", s);
+
+		getnameinfo((struct sockaddr *)&their_addr, sizeof their_addr, host, sizeof host, service, sizeof service, 0);
+		printf("   host: %s\n", host);   
+
+
+		printf("Connection from %s.\n", s);		//prints IP addr 
 
 		//wait on connection P for command from ftclient 
 
+		//void handleRequest(new_fd);
+		/*
 		//receive command on connection P 
 		char* placeholderHost = "flip2";
 		char* placeholderPort = "30020";
@@ -183,10 +211,10 @@ int main(int argc, char *argv[]) {
 						printf("Sending \"%s\" to %s:%s\n", placeholderFile, placeholderHost, placeholderPort); 
 
 						//loop to send whole file 
-						
+			
 
 				//close connection Q
-
+			*/	
 
 		//close connection P and terminate
 		close(new_fd);  

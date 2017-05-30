@@ -27,10 +27,16 @@ if __name__ == "__main__":
 	PORT = int(sys.argv[len(sys.argv)-1])   
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((HOST, PORT))
-	
-	s.sendall('Hello, world')
 
-	data = s.recv(1024)
+
+	#send command
+	cmd = raw_input()
+	s.send(cmd)
+	#s.sendall('Hello, world')
+
+	#receive response 
+	response = s.recv(1024)
+
 	s.close()
 	print 'Received', repr(data)
 
