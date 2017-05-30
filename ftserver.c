@@ -128,11 +128,12 @@ int main(int argc, char *argv[]) {
 	//http://beej.us/guide/bgnet/examples/server.c
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo; //*p;
-    struct sockaddr_storage their_addr; // connector's address information
+    struct sockaddr_in their_addr; // connector's address information
     socklen_t sin_size;
     char s[INET_ADDRSTRLEN];
 
-    char host[1024], service[20];	//getnameinfo
+    char clientHost[1024], clientService[20];	//getnameinfo
+    int clientPort;
 
     //validate command line parameters
     if (argc != 2) { fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); } 
@@ -161,22 +162,25 @@ int main(int argc, char *argv[]) {
 	while(1) {  
 		//wait on connection P for command from ftclient 
 		sin_size = sizeof their_addr;
+
+		//establish TCP control connection on <SERVER_PORT>, i.e., connection P
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
 		if (new_fd == -1) {
 			perror("accept");
 			continue;
 		}
 
-		//establish TCP control connection on <SERVER_PORT>, i.e., connection P
-		inet_ntop(their_addr.ss_family,						//get IP address 
-			get_in_addr((struct sockaddr *)&their_addr),
-			s, sizeof s);
+		
+		//inet_ntop(their_addr.ss_family,						//get IP address 
+		//	get_in_addr((struct sockaddr *)&their_addr),
+		//	s, sizeof s);
 
-		getnameinfo((struct sockaddr *)&their_addr, sizeof their_addr, host, sizeof host, service, sizeof service, 0);
-		printf("   host: %s\n", host);   
+		//get name of client host and port number 
+		getnameinfo((struct sockaddr *)&their_addr, sizeof their_addr, clientHost, sizeof clientHost, clientService, sizeof clientService, 0); 
+		clientPort = ntohs(their_addr.sin_port); 
+		printf("%d\n", clientPort);
 
-
-		printf("Connection from %s.\n", s);		//prints IP addr 
+		printf("Connection from %s.\n", clientHost);
 
 		//wait on connection P for command from ftclient 
 
