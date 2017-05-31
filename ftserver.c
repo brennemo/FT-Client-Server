@@ -71,19 +71,32 @@ int startup(struct addrinfo *servinfo) {
 }
 
 void getFileNames() {
-	char* fileNames[1000];	
-	int i;
+	//char* fileNames[BUFFER_SIZE];	
+	char fileNames[BUFFER_SIZE];
+	//int i = 0, j; 
 	DIR *dp;
 	struct dirent *ep;
+
+	memset(fileNames, '\0', sizeof(fileNames));
 
 	dp = opendir("./");
 	if (dp != NULL)
 	{
-		i = 0;
+		//i = 0;
 		while (ep = readdir(dp)) {
-			fileNames[i] = ep->d_name;
-			printf("%s ", fileNames[i]);
-			i++;
+			//fileNames[i] = ep->d_name;
+			//printf("%s\n", fileNames[i]);
+			//i++;
+			/*
+			printf("%s\n", ep->d_name);
+			j = sprintf(fileNames+i, BUFFER_SIZE-i, "%s\n",  ep->d_name);
+			printf("j: %d\n", j);
+			i = j;
+			printf("i: %d\n", i);
+			*/
+			strcat(fileNames, ep->d_name);
+			strcat(fileNames, "\n");
+			//snprintf(fileNames, BUFFER_SIZE, ep->d_name);
 		}
 		(void)closedir(dp);
 	}
@@ -91,6 +104,7 @@ void getFileNames() {
 		perror("Couldn't read the directory");
 		exit(1);
 	}
+	printf("%s", fileNames);
 }
 
 int findFile(char* fileName) {
@@ -120,8 +134,8 @@ int readFile(char *fileName) {
 
 
 void handleRequest(int new_fd, char clientHost[], int clientPort) {
-	//char* placeholderCommand = "l\n";
-	char* placeholderCommand = "g shortfile.txt\n";
+	char* placeholderCommand = "l\n";
+	//char* placeholderCommand = "g shortfile.txt\n";
 	//char* placeholderCommand = "g longfileee.txt\n";
 	//char* placeholderCommand = "bleraharea!34r\n";
 
@@ -135,6 +149,8 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 		printf("List directory requested on port %s.\n", clientHost);
 		printf("Sending directory contents to %s:%d\n", clientHost, clientPort);
 		getFileNames();
+
+		//CONNECTION Q 
 	}
 	else if (strncmp(placeholderCommand, "g", 1) == 0) {
 		//copy file name into buffer 
@@ -152,6 +168,8 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 			printf("File \"%s\" requested on port %d.\n", buffer, clientPort);
 			printf("Sending \"%s\" to %s:%d\n", buffer, clientHost, clientPort); 
 			readFile(buffer);
+
+			//CONNECTION Q
 		}
 
 		/*
