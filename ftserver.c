@@ -71,32 +71,18 @@ int startup(struct addrinfo *servinfo) {
 }
 
 void getFileNames() {
-	//char* fileNames[BUFFER_SIZE];	
 	char fileNames[BUFFER_SIZE];
-	//int i = 0, j; 
 	DIR *dp;
 	struct dirent *ep;
 
-	memset(fileNames, '\0', sizeof(fileNames));
+	memset(fileNames, '\0', sizeof fileNames);
 
 	dp = opendir("./");
 	if (dp != NULL)
 	{
-		//i = 0;
 		while (ep = readdir(dp)) {
-			//fileNames[i] = ep->d_name;
-			//printf("%s\n", fileNames[i]);
-			//i++;
-			/*
-			printf("%s\n", ep->d_name);
-			j = sprintf(fileNames+i, BUFFER_SIZE-i, "%s\n",  ep->d_name);
-			printf("j: %d\n", j);
-			i = j;
-			printf("i: %d\n", i);
-			*/
 			strcat(fileNames, ep->d_name);
 			strcat(fileNames, "\n");
-			//snprintf(fileNames, BUFFER_SIZE, ep->d_name);
 		}
 		(void)closedir(dp);
 	}
@@ -105,6 +91,7 @@ void getFileNames() {
 		exit(1);
 	}
 	printf("%s", fileNames);
+	
 }
 
 int findFile(char* fileName) {
@@ -114,7 +101,6 @@ int findFile(char* fileName) {
 	if (dp != NULL) {
 		while (ep = readdir(dp))	{
 			if (strcmp(ep->d_name, fileName) == 0) {
-				//printf("%s\n", ep->d_name);
 				return 1;
 			}
 		}
@@ -122,20 +108,24 @@ int findFile(char* fileName) {
 	return 0;	//file not found 
 }
 
-int readFile(char *fileName) {
+void readFile(char *fileName) {
 	FILE* requestedFile = fopen(fileName, "r");
 	char fileLine[BUFFER_SIZE];
 
-	while (fgets(fileLine, sizeof(fileLine), requestedFile)) {
-		printf("%s\n", fileLine);
+	int i = 0; 
+
+	while (fgets(fileLine, sizeof fileLine, requestedFile)) {
+		printf("%s 	%d\n", fileLine, i++);
+		memset(fileLine, '\0', sizeof fileLine);
 	}
+
 	fclose(requestedFile);
 }
 
 
 void handleRequest(int new_fd, char clientHost[], int clientPort) {
-	char* placeholderCommand = "l\n";
-	//char* placeholderCommand = "g shortfile.txt\n";
+	//char* placeholderCommand = "l\n";
+	char* placeholderCommand = "g shortfile.txt\n";
 	//char* placeholderCommand = "g longfileee.txt\n";
 	//char* placeholderCommand = "bleraharea!34r\n";
 
