@@ -8,11 +8,17 @@ import signal
 import socket
 import sys
 
+def start_up(port):
+    """
+    Returns: socket file descriptor 
+    """   
+    q = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    q.bind(('', port))
+    q.listen(1)                #allow 1 connection at a time 
+    return q 
 
 if __name__ == "__main__":
-
-
-
 	#https://docs.python.org/2/library/socket.html
 
 	#start on host B 
@@ -38,10 +44,24 @@ if __name__ == "__main__":
 		print cmd
 		s.send(cmd)
 
+		q = start_up(int(sys.argv[4]))		#wait for file list 
+
+		conn, addr = q.accept() 
+		response = conn.recv(1024)
+
+		conn.close() 
+
 	elif sys.argv[3] == '-g':
 		cmd = ' '.join(sys.argv[3:len(sys.argv)])[1:]	#join args with spaces, trim '-' from option
 		print cmd 
 		s.send(cmd)
+
+		q = start_up(int(sys.argv[5]))		#wait for files
+
+		conn, addr = q.accept() 
+		response = conn.recv(1024)
+
+		conn.close() 
 	#invalid command: display error message from connection P
 
 	#valid command: TCP data connection with ftserver on <DATA_PORT>, i.e., connection Q 
@@ -50,9 +70,6 @@ if __name__ == "__main__":
 			#save file received on connection Q in current default directory 
 				#handle duplicate file names
 				#display 'transfer complete' message 
-
-	#send command
-	#s.send(sys.argv[1])
 	
 	#receive response 
 	response = s.recv(1024)

@@ -71,7 +71,42 @@ int startup(struct addrinfo *servinfo) {
     return sockfd; 
 }
 
-void sendFileNames(char* port) {
+int initiateOnDataConnection(char *host, char *port) {
+	struct addrinfo hints, *res;
+	char ipstr[INET_ADDRSTRLEN];
+	
+	int socketfd; 
+	
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_INET; 	
+	hints.ai_socktype = SOCK_STREAM;		//TCP
+	hints.ai_flags = AI_PASSIVE; 
+	
+	//fill addrinfo struct 
+	if (getaddrinfo(host, port, &hints, &res) != 0) {
+		fprintf(stderr,"error: getaddrinfo\n"); exit(1); 	
+	}
+	
+	//create socket 
+	socketfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+	if (socketfd == -1) { fprintf(stderr,"error: socket\n"); exit(1); }
+	
+	//establish connection 
+	//status = connect(socketfd, res->ai_addr, res->ai_addrlen);
+	if (connect(socketfd, res->ai_addr, res->ai_addrlen) == -1) {
+		fprintf(stderr,"error: connect\n"); 
+		close(socketfd);
+		exit(1); 
+	}
+		
+	freeaddrinfo(res);						//free linked list
+	
+	return socketfd;
+	
+}
+
+void sendFileNames(char *host, char* port) {
+	int q_fd;						//data connection file descriptor 
 	char fileNames[BUFFER_SIZE];
 	DIR *dp;
 	struct dirent *ep;
@@ -92,6 +127,8 @@ void sendFileNames(char* port) {
 		exit(1);
 	}
 	printf("%s", fileNames);
+
+	q_fd = initiateOnDataConnection(host, port);
 
 	//addrinfo
 	//socket
@@ -125,7 +162,9 @@ int findFile(char* fileName) {
 	return 0;	//file not found 
 }
 
-void sendFile(char *fileName, char* port) {
+void sendFile(char *fileName, char *host, char* port) {
+	int q_fd;						//data connection file descriptor
+
 	FILE* requestedFile = fopen(fileName, "r");
 	char fileLine[BUFFER_SIZE];
 	char completeFile[FILE_SIZE];
@@ -144,6 +183,8 @@ void sendFile(char *fileName, char* port) {
 
 	printf("%s", completeFile);
 
+	q_fd = initiateOnDataConnection(host, port);
+
 	/*
 	int sentLength = 0;
 	int charsRead = 0;
@@ -155,7 +196,7 @@ void sendFile(char *fileName, char* port) {
 }
 
 
-int handleRequest(int new_fd, char clientHost[]) {
+int handleRequest(int new_fd, char* clientHost) {
 	//char* placeholderCommand = "l\n";
 	//char* placeholderCommand = "g shortfile.txt\n";
 	//char* placeholderCommand = "g longfileee.txt\n";
@@ -178,7 +219,7 @@ int handleRequest(int new_fd, char clientHost[]) {
 	if (strncmp(buffer, "l", 1) == 0) {
 		printf("List directory requested on port %s.\n", clientHost);
 		printf("Sending directory contents to %s:%s\n", clientHost, dataPort);
-		sendFileNames(dataPort);
+		sendFileNames(clientHost, dataPort);
 
 		//CONNECTION Q 
 	}
@@ -198,7 +239,7 @@ int handleRequest(int new_fd, char clientHost[]) {
 			//send file to client 
 				printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
 				printf("Sending \"%s\" to %s:%s\n", buffer, fileName, dataPort); 
-				sendFile(fileName, dataPort);
+				sendFile(fileName, clientHost, dataPort);
 
 				//CONNECTION Q
 			}
