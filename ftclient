@@ -48,6 +48,7 @@ if __name__ == "__main__":
 
 		conn, addr = q.accept() 
 		response = conn.recv(1024)
+		print response 
 
 		conn.close() 
 
@@ -60,6 +61,7 @@ if __name__ == "__main__":
 
 		conn, addr = q.accept() 
 		response = conn.recv(1024)
+		print response 
 
 		conn.close() 
 	#invalid command: display error message from connection P

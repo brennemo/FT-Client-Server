@@ -130,10 +130,8 @@ void sendFileNames(char *host, char* port) {
 
 	q_fd = initiateOnDataConnection(host, port);
 
-	//addrinfo
-	//socket
-	//connect 
-	//free addrinfo 
+	//test sending a short string without loop
+	send(q_fd, fileNames, strlen(fileNames), 0); 
 
 	/*
 	int sentLength = 0;
