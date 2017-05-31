@@ -70,21 +70,39 @@ int startup(struct addrinfo *servinfo) {
     return sockfd; 
 }
 
-void handleRequest(int new_fd) {
-	char* placeholderHost = "flip2";
-	char* placeholderPort = "30020";
+void handleRequest(int new_fd, char clientHost[], int clientPort) {
+	//char* placeholderHost = "flip2";
+	//char* placeholderPort = "30020";
 	char* placeholderFile = "shortfile.txt";
+
+	//char* placeholderCommand = "l\n";
+	//char* placeholderCommand = "g shortfile.txt\n";
+	char* placeholderCommand = "g longfileee.txt\n";
+	//char* placeholderCommand = "bleraharea!34r\n";
 
 	char buffer[BUFFER_SIZE];
 
 	memset(buffer, '\0', BUFFER_SIZE);
 	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
 
-	printf("List directory requested on port %s.\n", placeholderHost);
 
-	//if command from ftclient == "-l"
-	printf("Sending directory contents to %s:%s\n", placeholderHost, placeholderPort);
-	//getFileNames();
+	if (strncmp(placeholderCommand, "l", 1) == 0) {
+		printf("List directory requested on port %s.\n", clientHost);
+		printf("Sending directory contents to %s:%d\n", clientHost, clientPort);
+		//getFileNames();
+	}
+	else if (strncmp(placeholderCommand, "g", 1) == 0) {
+		printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
+		printf("FILE NOT FOUND\n");
+
+		//send contents of FILENAME on connection Q
+		printf("File \"%s\" requested on port %d.\n", placeholderFile, clientPort);
+		printf("Sending \"%s\" to %s:%d\n", placeholderFile, clientHost, clientPort); 
+
+	}
+	else {
+		printf("error: invalid command\n");
+	}
 
 }
 
@@ -113,6 +131,13 @@ void getFileNames() {
 
 
 int main(int argc, char *argv[]) {
+
+	char clientHost[1024] = "flip2.engr.oregonstate.edu";	//getnameinfo
+    int clientPort;
+
+    clientPort = 12345;
+
+	handleRequest(1, clientHost, clientPort);		//test locally w/out server 
 	/*
 	struct sigaction SIGINT_action = { 0 };
 
@@ -125,6 +150,8 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGINT, &SIGINT_action, NULL);
 	*/
 
+
+	/*
 	//http://beej.us/guide/bgnet/examples/server.c
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo; //*p;
@@ -185,7 +212,7 @@ int main(int argc, char *argv[]) {
 		//wait on connection P for command from ftclient 
 
 		//void handleRequest(new_fd);
-		/*
+		
 		//receive command on connection P 
 		char* placeholderHost = "flip2";
 		char* placeholderPort = "30020";
@@ -218,11 +245,12 @@ int main(int argc, char *argv[]) {
 			
 
 				//close connection Q
-			*/	
+			
 
 		//close connection P and terminate
 		close(new_fd);  
 	}
+	*/
 	
 	return 0;
 }
