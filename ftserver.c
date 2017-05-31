@@ -133,6 +133,8 @@ void sendFileNames(char *host, char* port) {
 	//test sending a short string without loop
 	send(q_fd, fileNames, strlen(fileNames), 0); 
 
+	close(q_fd);
+
 	/*
 	int sentLength = 0;
 	int charsRead = 0;
@@ -182,6 +184,11 @@ void sendFile(char *fileName, char *host, char* port) {
 	printf("%s", completeFile);
 
 	q_fd = initiateOnDataConnection(host, port);
+
+	//test sending a short string without loop
+	send(q_fd, completeFile, strlen(completeFile), 0);
+
+	close(q_fd);
 
 	/*
 	int sentLength = 0;
