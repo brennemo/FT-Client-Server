@@ -108,6 +108,16 @@ int findFile(char* fileName) {
 	return 0;	//file not found 
 }
 
+int readFile(char *fileName) {
+	FILE* requestedFile = fopen(fileName, "r");
+	char fileLine[BUFFER_SIZE];
+
+	while (fgets(fileLine, sizeof(fileLine), requestedFile)) {
+		printf("%s\n", fileLine);
+	}
+	fclose(requestedFile);
+}
+
 
 void handleRequest(int new_fd, char clientHost[], int clientPort) {
 	//char* placeholderCommand = "l\n";
@@ -141,6 +151,7 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 		} else {
 			printf("File \"%s\" requested on port %d.\n", buffer, clientPort);
 			printf("Sending \"%s\" to %s:%d\n", buffer, clientHost, clientPort); 
+			readFile(buffer);
 		}
 
 		/*
