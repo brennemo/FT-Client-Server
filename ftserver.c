@@ -170,11 +170,8 @@ int handleRequest(int new_fd, char clientHost[]) {
 	memset(buffer, '\0', sizeof buffer);
 	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
 
+	//copy port number (last 5 characters) and convert to int 
 	memcpy(portString, buffer+(strlen(buffer)-5), 5);
-	int i;
-	for(i = 0; i < strlen(portString)+1; i++) {
-		printf("%i:	%c	%d\n", i, portString[i], portString[i]);
-	}
 	clientPort = atoi(portString);	
 
 
@@ -186,40 +183,30 @@ int handleRequest(int new_fd, char clientHost[]) {
 		//CONNECTION Q 
 	}
 	else if (strncmp(buffer, "g", 1) == 0) {
-			//copy file name into buffer 
-			if (strlen(buffer) > 1) {
-				memcpy(fileName, buffer+2, strlen(buffer)-8);	//get fileName - starts after 'g ' and before ' #####\n'
-				fileName[strlen(buffer)-8] = '\0';
-				printf("%s\n", fileName);
-				/*
-				int i;
-				for(i = 0; i < strlen(buffer)+1; i++) {
-					printf("%i:	%c	%d\n", i, buffer[i], buffer[i]);
-				}
+		//copy file name into buffer 
+		if (strlen(buffer) > 1) {
+			memcpy(fileName, buffer+2, strlen(buffer)-8);	//get fileName - starts after 'g ' and before ' #####\n'
+			fileName[strlen(buffer)-8] = '\0';
+			printf("%s\n", fileName);
 
-				for(i = 0; i < strlen(fileName)+1; i++) {
-					printf("%i:	%c	%d\n", i, fileName[i], fileName[i]);
-				}
-				*/
-
-				//send error message if not found 
-				if (!findFile(fileName)) {
-					printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
-					printf("FILE NOT FOUND\n");
-					return 1; 
-
-				//send file to client 
-				} else {
-					printf("File \"%s\" requested on port %d.\n", fileName, clientPort);
-					printf("Sending \"%s\" to %s:%d\n", buffer, fileName, clientPort); 
-					sendFile(fileName);
-
-					//CONNECTION Q
-				}
-			} else {
-				printf("error: missing file name\n");	
+			//send error message if not found 
+			if (!findFile(fileName)) {
+				printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
+				printf("FILE NOT FOUND\n");
 				return 1; 
+
+			//send file to client 
+			} else {
+				printf("File \"%s\" requested on port %d.\n", fileName, clientPort);
+				printf("Sending \"%s\" to %s:%d\n", buffer, fileName, clientPort); 
+				sendFile(fileName);
+
+				//CONNECTION Q
 			}
+		} else {
+			printf("error: missing file name\n");	
+			return 1; 
+		}
 
 		/*
 		int i;
@@ -306,13 +293,10 @@ int main(int argc, char *argv[]) {
 
 		//get name of client host and port number 
 		getnameinfo((struct sockaddr *)&their_addr, sizeof their_addr, clientHost, sizeof clientHost, clientService, sizeof clientService, 0); 
-		//clientPort = ntohs(their_addr.sin_port); 
-		//printf("%d\n", clientPort);
 
 		printf("Connection from %s.\n", clientHost);
 
 		//wait on connection P for command from ftclient 
-
 		handleRequest(new_fd, clientHost);
 
 		//close connection P and terminate
