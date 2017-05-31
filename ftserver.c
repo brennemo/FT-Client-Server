@@ -115,14 +115,23 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 		getFileNames();
 	}
 	else if (strncmp(placeholderCommand, "g", 1) == 0) {
+		memcpy(buffer, placeholderCommand+2, strlen(placeholderCommand)-2);
+		buffer[strlen(placeholderCommand)-3] = '\0';
+		printf("%s\n", buffer);
 
+		int i;
+		for(i = 0; i < strlen(buffer)+1; i++) {
+			printf("%c	%d\n", buffer[i], buffer[i]);
+		}
 
+		/*
 		printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
 		printf("FILE NOT FOUND\n");
 
 		//send contents of FILENAME on connection Q
 		printf("File \"%s\" requested on port %d.\n", placeholderFile, clientPort);
 		printf("Sending \"%s\" to %s:%d\n", placeholderFile, clientHost, clientPort); 
+		*/
 
 	}
 	else {
