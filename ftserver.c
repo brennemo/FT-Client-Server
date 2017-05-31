@@ -19,6 +19,7 @@
 #include <dirent.h>	
 
 #define BUFFER_SIZE 1000
+#define FILE_SIZE 10000
 
 void catchSIGINT(int signo) {
 	//foreground signal terminates self
@@ -70,7 +71,7 @@ int startup(struct addrinfo *servinfo) {
     return sockfd; 
 }
 
-void getFileNames() {
+void sendFileNames() {
 	char fileNames[BUFFER_SIZE];
 	DIR *dp;
 	struct dirent *ep;
@@ -91,6 +92,22 @@ void getFileNames() {
 		exit(1);
 	}
 	printf("%s", fileNames);
+
+	//addrinfo
+	//socket
+	//connect 
+	//free addrinfo 
+
+	/*
+	int sentLength = 0;
+	int charsRead = 0;
+	while (sentLength <= strlen(fileNames)) {
+		charsRead = send(fd, fileNames, strlen(fileNames), 0); 
+		sentLength += charsRead;
+	}
+	*/
+
+	//close connection 
 	
 }
 
@@ -108,10 +125,10 @@ int findFile(char* fileName) {
 	return 0;	//file not found 
 }
 
-void readFile(char *fileName) {
+void sendFile(char *fileName) {
 	FILE* requestedFile = fopen(fileName, "r");
 	char fileLine[BUFFER_SIZE];
-	char completeFile[10000];
+	char completeFile[FILE_SIZE];
 
 	//int i = 0; 
 	memset(fileLine, '\0', sizeof fileLine);
@@ -140,39 +157,41 @@ void readFile(char *fileName) {
 
 void handleRequest(int new_fd, char clientHost[], int clientPort) {
 	//char* placeholderCommand = "l\n";
-	char* placeholderCommand = "g shortfile.txt\n";
+	//char* placeholderCommand = "g shortfile.txt\n";
 	//char* placeholderCommand = "g longfileee.txt\n";
 	//char* placeholderCommand = "bleraharea!34r\n";
 
+	char fileName[FILE_SIZE];
 	char buffer[BUFFER_SIZE];
 
-	memset(buffer, '\0', BUFFER_SIZE);
+	memset(fileName, '\0', sizeof fileName);
+	memset(buffer, '\0', sizeof buffer);
 	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
 
 
-	if (strncmp(placeholderCommand, "l", 1) == 0) {
+	if (strncmp(buffer, "l", 1) == 0) {
 		printf("List directory requested on port %s.\n", clientHost);
 		printf("Sending directory contents to %s:%d\n", clientHost, clientPort);
-		getFileNames();
+		sendFileNames();
 
 		//CONNECTION Q 
 	}
-	else if (strncmp(placeholderCommand, "g", 1) == 0) {
+	else if (strncmp(buffer, "g", 1) == 0) {
 		//copy file name into buffer 
-		memcpy(buffer, placeholderCommand+2, strlen(placeholderCommand)-2);
-		buffer[strlen(placeholderCommand)-3] = '\0';
+		memcpy(fileName, buffer+2, strlen(buffer)-2);
+		fileName[strlen(buffer)-3] = '\0';
 		//printf("%s\n", buffer);
 
 		//send error message if not found 
-		if (!findFile(buffer)) {
+		if (!findFile(fileName)) {
 			printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
 			printf("FILE NOT FOUND\n");
 
 		//send file to client 
 		} else {
-			printf("File \"%s\" requested on port %d.\n", buffer, clientPort);
-			printf("Sending \"%s\" to %s:%d\n", buffer, clientHost, clientPort); 
-			readFile(buffer);
+			printf("File \"%s\" requested on port %d.\n", fileName, clientPort);
+			printf("Sending \"%s\" to %s:%d\n", buffer, fileName, clientPort); 
+			sendFile(fileName);
 
 			//CONNECTION Q
 		}
@@ -194,13 +213,6 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 
 
 int main(int argc, char *argv[]) {
-
-	char clientHost[1024] = "flip2.engr.oregonstate.edu";	//getnameinfo
-    int clientPort;
-
-    clientPort = 12345;
-
-	handleRequest(1, clientHost, clientPort);		//test locally w/out server 
 	/*
 	struct sigaction SIGINT_action = { 0 };
 
@@ -213,10 +225,10 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGINT, &SIGINT_action, NULL);
 	*/
 
-	/*	
+	
 	//http://beej.us/guide/bgnet/examples/server.c
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
-    struct addrinfo hints, *servinfo; //*p;
+    struct addrinfo hints, *servinfo; 
     struct sockaddr_in their_addr; // connector's address information
     socklen_t sin_size;
     char s[INET_ADDRSTRLEN];
@@ -267,18 +279,17 @@ int main(int argc, char *argv[]) {
 		//get name of client host and port number 
 		getnameinfo((struct sockaddr *)&their_addr, sizeof their_addr, clientHost, sizeof clientHost, clientService, sizeof clientService, 0); 
 		clientPort = ntohs(their_addr.sin_port); 
-		printf("%d\n", clientPort);
+		//printf("%d\n", clientPort);
 
 		printf("Connection from %s.\n", clientHost);
 
 		//wait on connection P for command from ftclient 
 
-		//handleRequest(new_fd, clientHost, clientPort);
+		handleRequest(new_fd, clientHost, clientPort);
 
 		//close connection P and terminate
 		close(new_fd);  
 	}
-	*/
 	
 	
 	return 0;

@@ -30,15 +30,14 @@ if __name__ == "__main__":
 
 
 	#send command
-	cmd = raw_input()
-	s.send(cmd)
+	s.send(sys.argv[1])
 	#s.sendall('Hello, world')
 
 	#receive response 
 	response = s.recv(1024)
 
 	s.close()
-	print 'Received', repr(data)
+	print 'Received', repr(response)
 
 	#send command (-l (list) or -g <FILENAME> (get)) on connection P 
 
