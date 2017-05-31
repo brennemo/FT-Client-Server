@@ -67,7 +67,12 @@ def receiveFile(conn, argv):
 
 	
 	#handle duplicate file names
-	handleDuplicateFiles(argv[4])
+	if isDuplicateFile(argv[4]):
+		print 'duplicate file name'
+	else:
+		createFile(argv[4])
+		print 'transfer complete'
+
 
 	#save file received on connection Q in current default directory 
 
@@ -75,11 +80,14 @@ def receiveFile(conn, argv):
 
 	return 
 
-def handleDuplicateFiles(fileName):
-	print 'duplicate file name'
+def isDuplicateFile(fileName):
 	dir = os.listdir('.')
-
 	return fileName in dir
+
+def createFile(fileName):
+	#f = open('blorps.txt')
+	#f.close()
+
 
 
 if __name__ == "__main__":	
@@ -95,7 +103,8 @@ if __name__ == "__main__":
 	#makeRequest(s, sys.argv)
 	
 	#test
-	print handleDuplicateFiles('shortfile.txt')
+	print isDuplicateFile('shortfile.txt')
+	createFile('blorps.txt')
 
 	#s.close()
 	#print 'Received', repr(response)
