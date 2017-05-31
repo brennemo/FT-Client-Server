@@ -93,6 +93,23 @@ void getFileNames() {
 	}
 }
 
+int findFile(char* fileName) {
+	DIR *dp;
+	struct dirent *ep;
+		dp = opendir("./");
+	if (dp != NULL) {
+		while (ep = readdir(dp))	{
+			if (strcmp(ep->d_name, fileName) == 0) {
+				printf("%s\n", ep->d_name);
+				return 1;
+			}
+		}
+	}
+
+	return 0;	
+}
+
+
 void handleRequest(int new_fd, char clientHost[], int clientPort) {
 	//char* placeholderHost = "flip2";
 	//char* placeholderPort = "30020";
@@ -115,18 +132,29 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 		getFileNames();
 	}
 	else if (strncmp(placeholderCommand, "g", 1) == 0) {
+		//copy file name into buffer 
 		memcpy(buffer, placeholderCommand+2, strlen(placeholderCommand)-2);
 		buffer[strlen(placeholderCommand)-3] = '\0';
-		printf("%s\n", buffer);
+		//printf("%s\n", buffer);
 
+		if (!findFile(buffer)) {
+			printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
+			printf("FILE NOT FOUND\n");
+			
+		} else {
+			printf("File \"%s\" requested on port %d.\n", placeholderFile, clientPort);
+			printf("Sending \"%s\" to %s:%d\n", placeholderFile, clientHost, clientPort); 
+		}
+
+		/*
 		int i;
 		for(i = 0; i < strlen(buffer)+1; i++) {
 			printf("%c	%d\n", buffer[i], buffer[i]);
 		}
+		*/
 
 		/*
-		printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
-		printf("FILE NOT FOUND\n");
+
 
 		//send contents of FILENAME on connection Q
 		printf("File \"%s\" requested on port %d.\n", placeholderFile, clientPort);
@@ -138,11 +166,6 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 		printf("error: invalid command\n");
 	}
 
-}
-
-
-int findFile(char* fileName) {
-	return 1;	//file found 
 }
 
 
