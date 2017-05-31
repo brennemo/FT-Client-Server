@@ -116,6 +116,7 @@ void sendFileNames(char *host, char* port) {
 	dp = opendir("./");
 	if (dp != NULL)
 	{
+		//build string containing all filenames, separated by newlines 
 		while (ep = readdir(dp)) {
 			strcat(fileNames, ep->d_name);
 			strcat(fileNames, "\n");
@@ -126,11 +127,12 @@ void sendFileNames(char *host, char* port) {
 		perror("Couldn't read the directory");
 		exit(1);
 	}
-	printf("%s", fileNames);
+	//printf("%s", fileNames);
 
 	q_fd = initiateOnDataConnection(host, port);
 
 	//test sending a short string without loop
+	printf("Sending directory contents to %s:%s\n", host, port);
 	send(q_fd, fileNames, strlen(fileNames), 0); 
 
 	close(q_fd);
@@ -169,23 +171,23 @@ void sendFile(char *fileName, char *host, char* port) {
 	char fileLine[BUFFER_SIZE];
 	char completeFile[FILE_SIZE];
 
-	//int i = 0; 
 	memset(fileLine, '\0', sizeof fileLine);
 	memset(completeFile, '\0', sizeof completeFile);
 
+	//build single string containing all lines of the file 
 	while (fgets(fileLine, sizeof fileLine, requestedFile)) {
 		strcat(completeFile, fileLine);
-		//printf("%s 	%d\n", fileLine, i++);
 		memset(fileLine, '\0', sizeof fileLine);
 	}
 
 	fclose(requestedFile);
 
-	printf("%s", completeFile);
+	//printf("%s", completeFile);
 
 	q_fd = initiateOnDataConnection(host, port);
 
 	//test sending a short string without loop
+	printf("Sending \"%s\" to %s:%s\n", fileName, host, port); 
 	send(q_fd, completeFile, strlen(completeFile), 0);
 
 	close(q_fd);
@@ -211,6 +213,7 @@ int handleRequest(int new_fd, char* clientHost) {
 
 	char fileName[FILE_SIZE];
 	char buffer[BUFFER_SIZE];
+	char errorMessage[15] = "FILE NOT FOUND";
 
 	memset(fileName, '\0', sizeof fileName);
 	memset(buffer, '\0', sizeof buffer);
@@ -223,7 +226,7 @@ int handleRequest(int new_fd, char* clientHost) {
 
 	if (strncmp(buffer, "l", 1) == 0) {
 		printf("List directory requested on port %s.\n", clientHost);
-		printf("Sending directory contents to %s:%s\n", clientHost, dataPort);
+		//printf("Sending directory contents to %s:%s\n", clientHost, dataPort);
 		sendFileNames(clientHost, dataPort);
 
 		//CONNECTION Q 
@@ -238,12 +241,13 @@ int handleRequest(int new_fd, char* clientHost) {
 			//send error message if not found 
 			if (!findFile(fileName)) {
 				printf("File not found. Sending error message to %s:%s\n", clientHost, dataPort);
-				printf("FILE NOT FOUND\n");
+				printf("%s\n", errorMessage);
+				send(new_fd, errorMessage, strlen(errorMessage), 0);
 				return 1; 
 			} else {
 			//send file to client 
 				printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
-				printf("Sending \"%s\" to %s:%s\n", buffer, fileName, dataPort); 
+				//printf("Sending \"%s\" to %s:%s\n", fileName, clientHost, dataPort); 
 				sendFile(fileName, clientHost, dataPort);
 
 				//CONNECTION Q
@@ -285,8 +289,7 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGINT, &SIGINT_action, NULL);
 	*/
 
-	
-	//http://beej.us/guide/bgnet/examples/server.c
+
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo; 
     struct sockaddr_in their_addr; // connector's address information

@@ -19,8 +19,6 @@ def start_up(port):
     return q 
 
 if __name__ == "__main__":
-	#https://docs.python.org/2/library/socket.html
-
 	#start on host B 
 	
 	#validate command line parameters 
@@ -41,26 +39,37 @@ if __name__ == "__main__":
 	#send command (-l (list) or -g <FILENAME> (get)) on connection P 
 	if sys.argv[3] == '-l':
 		cmd = ' '.join(sys.argv[3:len(sys.argv)])[1:]	#join args with spaces, trim '-' from option
-		print cmd
+		#print cmd
 		s.send(cmd)
 
 		q = start_up(int(sys.argv[4]))		#wait for file list 
 
 		conn, addr = q.accept() 
 		response = conn.recv(1024)
+
+		print 'Receiving directory structure from...'
 		print response 
 
 		conn.close() 
 
 	elif sys.argv[3] == '-g':
 		cmd = ' '.join(sys.argv[3:len(sys.argv)])[1:]	#join args with spaces, trim '-' from option
-		print cmd 
+		#print cmd 
 		s.send(cmd)
+
+		response = ''
+		response = s.recv(1024)
+		if len(response) > 0:
+			print response 
+			#return
 
 		q = start_up(int(sys.argv[5]))		#wait for files
 
 		conn, addr = q.accept() 
+		response = ''
 		response = conn.recv(1024)
+
+		print 'Receiving '
 		print response 
 
 		conn.close() 
@@ -74,7 +83,9 @@ if __name__ == "__main__":
 				#display 'transfer complete' message 
 	
 	#receive response 
-	response = s.recv(1024)
+	#response = ''
+	#response = s.recv(1024)
+	#print response 
 
 	s.close()
 	#print 'Received', repr(response)
