@@ -70,42 +70,6 @@ int startup(struct addrinfo *servinfo) {
     return sockfd; 
 }
 
-void handleRequest(int new_fd, char clientHost[], int clientPort) {
-	//char* placeholderHost = "flip2";
-	//char* placeholderPort = "30020";
-	char* placeholderFile = "shortfile.txt";
-
-	//char* placeholderCommand = "l\n";
-	//char* placeholderCommand = "g shortfile.txt\n";
-	char* placeholderCommand = "g longfileee.txt\n";
-	//char* placeholderCommand = "bleraharea!34r\n";
-
-	char buffer[BUFFER_SIZE];
-
-	memset(buffer, '\0', BUFFER_SIZE);
-	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
-
-
-	if (strncmp(placeholderCommand, "l", 1) == 0) {
-		printf("List directory requested on port %s.\n", clientHost);
-		printf("Sending directory contents to %s:%d\n", clientHost, clientPort);
-		//getFileNames();
-	}
-	else if (strncmp(placeholderCommand, "g", 1) == 0) {
-		printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
-		printf("FILE NOT FOUND\n");
-
-		//send contents of FILENAME on connection Q
-		printf("File \"%s\" requested on port %d.\n", placeholderFile, clientPort);
-		printf("Sending \"%s\" to %s:%d\n", placeholderFile, clientHost, clientPort); 
-
-	}
-	else {
-		printf("error: invalid command\n");
-	}
-
-}
-
 void getFileNames() {
 	char* fileNames[1000];	
 	int i;
@@ -127,6 +91,49 @@ void getFileNames() {
 		perror("Couldn't read the directory");
 		exit(1);
 	}
+}
+
+void handleRequest(int new_fd, char clientHost[], int clientPort) {
+	//char* placeholderHost = "flip2";
+	//char* placeholderPort = "30020";
+	char* placeholderFile = "shortfile.txt";
+
+	//char* placeholderCommand = "l\n";
+	//char* placeholderCommand = "g shortfile.txt\n";
+	char* placeholderCommand = "g longfileee.txt\n";
+	//char* placeholderCommand = "bleraharea!34r\n";
+
+	char buffer[BUFFER_SIZE];
+
+	memset(buffer, '\0', BUFFER_SIZE);
+	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
+
+
+	if (strncmp(placeholderCommand, "l", 1) == 0) {
+		printf("List directory requested on port %s.\n", clientHost);
+		printf("Sending directory contents to %s:%d\n", clientHost, clientPort);
+		getFileNames();
+	}
+	else if (strncmp(placeholderCommand, "g", 1) == 0) {
+
+
+		printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
+		printf("FILE NOT FOUND\n");
+
+		//send contents of FILENAME on connection Q
+		printf("File \"%s\" requested on port %d.\n", placeholderFile, clientPort);
+		printf("Sending \"%s\" to %s:%d\n", placeholderFile, clientHost, clientPort); 
+
+	}
+	else {
+		printf("error: invalid command\n");
+	}
+
+}
+
+
+int findFile(char* fileName) {
+	return 1;	//file found 
 }
 
 
