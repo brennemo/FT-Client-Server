@@ -8,15 +8,68 @@ import signal
 import socket
 import sys
 
-def start_up(port):
+def initiateContact(argv):
+	HOST = argv[1]
+	PORT = int(argv[2])   
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((HOST, PORT))
+	return s
+
+def startUp(port):
     """
-    Returns: socket file descriptor 
+    Returns: socket file descriptor for data connection 
     """   
     q = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
     q.bind(('', port))
     q.listen(1)                #allow 1 connection at a time 
     return q 
+
+def makeRequest(s, argv): 
+	if argv[3] == '-l':
+		cmd = ' '.join(argv[3:len(argv)])[1:]	#join args with spaces, trim '-' from option
+		print cmd
+		s.send(cmd)
+		"""
+		response = ''
+		response = s.recv(1024)
+		if len(response) > 0:
+			print response 
+			return
+		"""
+		q = startUp(int(argv[4]))		#wait for file list 
+
+		conn, addr = q.accept() 
+		response = conn.recv(1024)
+
+		print 'Receiving directory structure from...'
+		print response 
+
+		conn.close() 
+
+	elif argv[3] == '-g':
+		cmd = ' '.join(argv[3:len(argv)])[1:]	#join args with spaces, trim '-' from option
+		print cmd 
+		s.send(cmd)
+
+		q = startUp(int(argv[5]))		#wait for files
+
+		conn, addr = q.accept() 
+		response = ''
+		response = conn.recv(1024)
+
+		print 'Receiving '
+		print response 
+
+		conn.close() 
+	return 
+
+
+def receiveFile(): 
+	return 
+
+
+
 
 if __name__ == "__main__":
 	#start on host B 
@@ -29,20 +82,30 @@ if __name__ == "__main__":
 	"""
 
 	#establish TCP control connection on <SERVER_PORT>, i.e., connection P
-	
+	"""
 	HOST = sys.argv[1]
 	PORT = int(sys.argv[2])   
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((HOST, PORT))
+	"""
+	s = initiateContact(sys.argv)
+	makeRequest(s, sys.argv)
 	
 	
 	#send command (-l (list) or -g <FILENAME> (get)) on connection P 
+	"""
 	if sys.argv[3] == '-l':
 		cmd = ' '.join(sys.argv[3:len(sys.argv)])[1:]	#join args with spaces, trim '-' from option
 		#print cmd
 		s.send(cmd)
 
-		q = start_up(int(sys.argv[4]))		#wait for file list 
+		response = ''
+		response = s.recv(1024)
+		if len(response) > 0:
+			print response 
+			#return
+
+		q = startUp(int(sys.argv[4]))		#wait for file list 
 
 		conn, addr = q.accept() 
 		response = conn.recv(1024)
@@ -63,7 +126,7 @@ if __name__ == "__main__":
 			print response 
 			#return
 
-		q = start_up(int(sys.argv[5]))		#wait for files
+		q = startUp(int(sys.argv[5]))		#wait for files
 
 		conn, addr = q.accept() 
 		response = ''
@@ -73,6 +136,7 @@ if __name__ == "__main__":
 		print response 
 
 		conn.close() 
+		"""
 	#invalid command: display error message from connection P
 
 	#valid command: TCP data connection with ftserver on <DATA_PORT>, i.e., connection Q 

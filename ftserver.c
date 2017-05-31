@@ -94,7 +94,7 @@ int initiateOnDataConnection(char *host, char *port) {
 	//establish connection 
 	//status = connect(socketfd, res->ai_addr, res->ai_addrlen);
 	if (connect(socketfd, res->ai_addr, res->ai_addrlen) == -1) {
-		fprintf(stderr,"error: connect\n"); 
+		fprintf(stderr,"error: data connection\n"); 
 		close(socketfd);
 		exit(1); 
 	}
