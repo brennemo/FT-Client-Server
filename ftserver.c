@@ -128,9 +128,10 @@ void readFile(char *fileName) {
 	printf("%s", completeFile);
 
 	/*
-	sentLength = 0;
-	while (sentLength <= strlen(encryptedMessage)) {
-		charsRead = send(establishedConnectionFD, encryptedMessage, strlen(encryptedMessage), 0); 
+	int sentLength = 0;
+	int charsRead = 0;
+	while (sentLength <= strlen(completeFile)) {
+		charsRead = send(fd, completeFile, strlen(completeFile), 0); 
 		sentLength += charsRead;
 	}
 	*/
@@ -212,8 +213,7 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGINT, &SIGINT_action, NULL);
 	*/
 
-
-	/*
+	/*	
 	//http://beej.us/guide/bgnet/examples/server.c
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo; //*p;
@@ -273,46 +273,13 @@ int main(int argc, char *argv[]) {
 
 		//wait on connection P for command from ftclient 
 
-		//void handleRequest(new_fd);
-		
-		//receive command on connection P 
-		char* placeholderHost = "flip2";
-		char* placeholderPort = "30020";
-		char* placeholderFile = "shortfile.txt";
-
-		printf("List directory requested on port %s.\n", placeholderHost);
-		
-
-			//if ftclient sent invalid command
-
-				//error message to ftclient on connection P
-
-			//else 
-				//initiate TCP data connection with ftclient on <DATA_PORT>, i.e., connection Q 
-					//if command from ftclient == "-l"
-					printf("Sending directory contents to %s:%s\n", placeholderHost, placeholderPort);
-					//getFileNames();
-					
-					//if command from ftclient == "-g <FiLENAME>"
-						//validate FILENAME 
-						//send error message on connection P 
-						printf("File not found. Sending error message to %s:%s\n", placeholderHost, placeholderPort);
-						printf("FILE NOT FOUND\n");
-
-						//send contents of FILENAME on connection Q
-						printf("File \"%s\" requested on port %s.\n", placeholderFile, placeholderPort);
-						printf("Sending \"%s\" to %s:%s\n", placeholderFile, placeholderHost, placeholderPort); 
-
-						//loop to send whole file 
-			
-
-				//close connection Q
-			
+		//handleRequest(new_fd, clientHost, clientPort);
 
 		//close connection P and terminate
 		close(new_fd);  
 	}
 	*/
+	
 	
 	return 0;
 }
