@@ -6,7 +6,7 @@
 
 import signal 
 import socket
-import sys
+import os, sys
 
 def initiateContact(argv):
 	HOST = argv[1]
@@ -65,13 +65,21 @@ def receiveFile(conn, argv):
 	print 'Receiving ' + '\"' + argv[4] + '\" from ' + argv[1] + ':' + argv[2]
 	print '\n' + response	#test print  
 
-	#save file received on connection Q in current default directory 
+	
 	#handle duplicate file names
+	handleDuplicateFiles(argv[4])
+
+	#save file received on connection Q in current default directory 
+
 	#display 'transfer complete' message 
 
 	return 
 
+def handleDuplicateFiles(fileName):
+	print 'duplicate file name'
+	dir = os.listdir('.')
 
+	return fileName in dir
 
 
 if __name__ == "__main__":	
@@ -83,11 +91,13 @@ if __name__ == "__main__":
 	"""
 
 	#establish TCP control connection on <SERVER_PORT>, i.e., connection P
-	s = initiateContact(sys.argv)
-	makeRequest(s, sys.argv)
+	#s = initiateContact(sys.argv)
+	#makeRequest(s, sys.argv)
 	
+	#test
+	print handleDuplicateFiles('shortfile.txt')
 
-	s.close()
+	#s.close()
 	#print 'Received', repr(response)
 	
 
