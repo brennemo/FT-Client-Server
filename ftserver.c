@@ -179,9 +179,17 @@ int handleRequest(int new_fd, char clientHost[], int clientPort) {
 	else if (strncmp(buffer, "g", 1) == 0) {
 			//copy file name into buffer 
 			if (strlen(buffer) > 1) {
-				memcpy(fileName, buffer+2, strlen(buffer)-2);
-				fileName[strlen(buffer)-2] = '\0';
+				memcpy(fileName, buffer+2, strlen(buffer)-8);	//get fileName - starts after 'g ' and before ' #####\n'
+				fileName[strlen(buffer)-8] = '\0';
 				printf("%s\n", fileName);
+				int i;
+				for(i = 0; i < strlen(buffer)+1; i++) {
+					printf("%i:	%c	%d\n", i, buffer[i], buffer[i]);
+				}
+
+				for(i = 0; i < strlen(fileName)+1; i++) {
+					printf("%i:	%c	%d\n", i, fileName[i], fileName[i]);
+				}
 
 				//send error message if not found 
 				if (!findFile(fileName)) {
