@@ -155,7 +155,7 @@ void sendFile(char *fileName) {
 }
 
 
-void handleRequest(int new_fd, char clientHost[], int clientPort) {
+int handleRequest(int new_fd, char clientHost[], int clientPort) {
 	//char* placeholderCommand = "l\n";
 	//char* placeholderCommand = "g shortfile.txt\n";
 	//char* placeholderCommand = "g longfileee.txt\n";
@@ -177,24 +177,30 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 		//CONNECTION Q 
 	}
 	else if (strncmp(buffer, "g", 1) == 0) {
-		//copy file name into buffer 
-		memcpy(fileName, buffer+2, strlen(buffer)-2);
-		fileName[strlen(buffer)-3] = '\0';
-		//printf("%s\n", buffer);
+			//copy file name into buffer 
+			if (strlen(buffer) > 1) {
+				memcpy(fileName, buffer+2, strlen(buffer)-2);
+				fileName[strlen(buffer)-2] = '\0';
+				printf("%s\n", fileName);
 
-		//send error message if not found 
-		if (!findFile(fileName)) {
-			printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
-			printf("FILE NOT FOUND\n");
+				//send error message if not found 
+				if (!findFile(fileName)) {
+					printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
+					printf("FILE NOT FOUND\n");
+					return 1; 
 
-		//send file to client 
-		} else {
-			printf("File \"%s\" requested on port %d.\n", fileName, clientPort);
-			printf("Sending \"%s\" to %s:%d\n", buffer, fileName, clientPort); 
-			sendFile(fileName);
+				//send file to client 
+				} else {
+					printf("File \"%s\" requested on port %d.\n", fileName, clientPort);
+					printf("Sending \"%s\" to %s:%d\n", buffer, fileName, clientPort); 
+					sendFile(fileName);
 
-			//CONNECTION Q
-		}
+					//CONNECTION Q
+				}
+			} else {
+				printf("error: missing file name\n");	
+				return 1; 
+			}
 
 		/*
 		int i;
@@ -207,7 +213,10 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 	}
 	else {
 		printf("error: invalid command\n");
+		return 1;
 	}
+
+	return 0;
 
 }
 

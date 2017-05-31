@@ -16,36 +16,48 @@ if __name__ == "__main__":
 	#https://docs.python.org/2/library/socket.html
 
 	#start on host B 
-
+	
 	#validate command line parameters 
-	#if len(sys.argv) < 3:
-	#print "USAGE: ./chatserve <port #>"
-	#exit(1)
+	"""
+	if len(sys.argv) < 5:
+		print "USAGE: ./chatserve <port #>"
+		exit(1)
+	"""
 
 	#establish TCP control connection on <SERVER_PORT>, i.e., connection P
+	
 	HOST = sys.argv[1]
-	PORT = int(sys.argv[len(sys.argv)-1])   
+	PORT = int(sys.argv[2])   
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((HOST, PORT))
+	
+	
+	#send command (-l (list) or -g <FILENAME> (get)) on connection P 
+	if sys.argv[3] == '-l':
+		cmd = ' '.join(sys.argv[3:len(sys.argv)])[1:]	#join args with spaces, trim '-' from option
+		print cmd
+		s.send(cmd)
 
+	elif sys.argv[3] == '-g':
+		cmd = ' '.join(sys.argv[3:len(sys.argv)])[1:]	#join args with spaces, trim '-' from option
+		print cmd 
+		s.send(cmd)
+	#invalid command: display error message from connection P
+
+	#valid command: TCP data connection with ftserver on <DATA_PORT>, i.e., connection Q 
+
+			#receive error message on connection P and display 
+			#save file received on connection Q in current default directory 
+				#handle duplicate file names
+				#display 'transfer complete' message 
 
 	#send command
-	s.send(sys.argv[1])
-	#s.sendall('Hello, world')
-
+	#s.send(sys.argv[1])
+	
 	#receive response 
 	response = s.recv(1024)
 
 	s.close()
 	print 'Received', repr(response)
+	
 
-	#send command (-l (list) or -g <FILENAME> (get)) on connection P 
-
-		#invalid command: display error message from connection P
-
-		#valid command: TCP data connection with ftserver on <DATA_PORT>, i.e., connection Q 
-
-				#receive error message on connection P and display 
-				#save file received on connection Q in current default directory 
-					#handle duplicate file names
-					#display 'transfer complete' message 
