@@ -71,7 +71,7 @@ int startup(struct addrinfo *servinfo) {
     return sockfd; 
 }
 
-void sendFileNames() {
+void sendFileNames(char* port) {
 	char fileNames[BUFFER_SIZE];
 	DIR *dp;
 	struct dirent *ep;
@@ -125,7 +125,7 @@ int findFile(char* fileName) {
 	return 0;	//file not found 
 }
 
-void sendFile(char *fileName) {
+void sendFile(char *fileName, char* port) {
 	FILE* requestedFile = fopen(fileName, "r");
 	char fileLine[BUFFER_SIZE];
 	char completeFile[FILE_SIZE];
@@ -160,8 +160,8 @@ int handleRequest(int new_fd, char clientHost[]) {
 	//char* placeholderCommand = "g shortfile.txt\n";
 	//char* placeholderCommand = "g longfileee.txt\n";
 	//char* placeholderCommand = "bleraharea!34r\n";
-	char portString[5];
-	int clientPort; 
+	char dataPort[5];
+	//int clientPort; 
 
 	char fileName[FILE_SIZE];
 	char buffer[BUFFER_SIZE];
@@ -171,14 +171,14 @@ int handleRequest(int new_fd, char clientHost[]) {
 	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
 
 	//copy port number (last 5 characters) and convert to int 
-	memcpy(portString, buffer+(strlen(buffer)-5), 5);
-	clientPort = atoi(portString);	
+	memcpy(dataPort, buffer+(strlen(buffer)-5), 5);
+	//clientPort = atoi(portString);	
 
 
 	if (strncmp(buffer, "l", 1) == 0) {
 		printf("List directory requested on port %s.\n", clientHost);
-		printf("Sending directory contents to %s:%d\n", clientHost, clientPort);
-		sendFileNames();
+		printf("Sending directory contents to %s:%s\n", clientHost, dataPort);
+		sendFileNames(dataPort);
 
 		//CONNECTION Q 
 	}
@@ -187,19 +187,18 @@ int handleRequest(int new_fd, char clientHost[]) {
 		if (strlen(buffer) > 1) {
 			memcpy(fileName, buffer+2, strlen(buffer)-8);	//get fileName - starts after 'g ' and before ' #####\n'
 			fileName[strlen(buffer)-8] = '\0';
-			printf("%s\n", fileName);
+			//printf("%s\n", fileName);
 
 			//send error message if not found 
 			if (!findFile(fileName)) {
-				printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
+				printf("File not found. Sending error message to %s:%s\n", clientHost, dataPort);
 				printf("FILE NOT FOUND\n");
 				return 1; 
-
-			//send file to client 
 			} else {
-				printf("File \"%s\" requested on port %d.\n", fileName, clientPort);
-				printf("Sending \"%s\" to %s:%d\n", buffer, fileName, clientPort); 
-				sendFile(fileName);
+			//send file to client 
+				printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
+				printf("Sending \"%s\" to %s:%s\n", buffer, fileName, dataPort); 
+				sendFile(fileName, dataPort);
 
 				//CONNECTION Q
 			}
