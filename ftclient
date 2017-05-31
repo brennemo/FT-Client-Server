@@ -30,13 +30,7 @@ def makeRequest(s, argv):
 		cmd = ' '.join(argv[3:len(argv)])[1:]	#join args with spaces, trim '-' from option
 		print cmd
 		s.send(cmd)
-		"""
-		response = ''
-		response = s.recv(1024)
-		if len(response) > 0:
-			print response 
-			return
-		"""
+
 		q = startUp(int(argv[4]))		#wait for file list 
 
 		conn, addr = q.accept() 
@@ -52,20 +46,24 @@ def makeRequest(s, argv):
 		print cmd 
 		s.send(cmd)
 
+		#HANDLE FILE NOT FOUND 
+
 		q = startUp(int(argv[5]))		#wait for files
 
 		conn, addr = q.accept() 
-		response = ''
-		response = conn.recv(1024)
-
-		print 'Receiving '
-		print response 
+		receiveFile(conn)
 
 		conn.close() 
+
 	return 
 
 
-def receiveFile(): 
+def receiveFile(conn): 
+	response = ''
+	response = conn.recv(1024)
+
+	print 'Receiving '
+	print response 
 	return 
 
 
