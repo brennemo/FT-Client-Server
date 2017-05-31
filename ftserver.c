@@ -100,24 +100,19 @@ int findFile(char* fileName) {
 	if (dp != NULL) {
 		while (ep = readdir(dp))	{
 			if (strcmp(ep->d_name, fileName) == 0) {
-				printf("%s\n", ep->d_name);
+				//printf("%s\n", ep->d_name);
 				return 1;
 			}
 		}
 	}
-
-	return 0;	
+	return 0;	//file not found 
 }
 
 
 void handleRequest(int new_fd, char clientHost[], int clientPort) {
-	//char* placeholderHost = "flip2";
-	//char* placeholderPort = "30020";
-	char* placeholderFile = "shortfile.txt";
-
 	//char* placeholderCommand = "l\n";
-	//char* placeholderCommand = "g shortfile.txt\n";
-	char* placeholderCommand = "g longfileee.txt\n";
+	char* placeholderCommand = "g shortfile.txt\n";
+	//char* placeholderCommand = "g longfileee.txt\n";
 	//char* placeholderCommand = "bleraharea!34r\n";
 
 	char buffer[BUFFER_SIZE];
@@ -137,13 +132,15 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 		buffer[strlen(placeholderCommand)-3] = '\0';
 		//printf("%s\n", buffer);
 
+		//send error message if not found 
 		if (!findFile(buffer)) {
 			printf("File not found. Sending error message to %s:%d\n", clientHost, clientPort);
 			printf("FILE NOT FOUND\n");
-			
+
+		//send file to client 
 		} else {
-			printf("File \"%s\" requested on port %d.\n", placeholderFile, clientPort);
-			printf("Sending \"%s\" to %s:%d\n", placeholderFile, clientHost, clientPort); 
+			printf("File \"%s\" requested on port %d.\n", buffer, clientPort);
+			printf("Sending \"%s\" to %s:%d\n", buffer, clientHost, clientPort); 
 		}
 
 		/*
@@ -153,13 +150,6 @@ void handleRequest(int new_fd, char clientHost[], int clientPort) {
 		}
 		*/
 
-		/*
-
-
-		//send contents of FILENAME on connection Q
-		printf("File \"%s\" requested on port %d.\n", placeholderFile, clientPort);
-		printf("Sending \"%s\" to %s:%d\n", placeholderFile, clientHost, clientPort); 
-		*/
 
 	}
 	else {
