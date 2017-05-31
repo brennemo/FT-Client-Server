@@ -155,11 +155,13 @@ void sendFile(char *fileName) {
 }
 
 
-int handleRequest(int new_fd, char clientHost[], int clientPort) {
+int handleRequest(int new_fd, char clientHost[]) {
 	//char* placeholderCommand = "l\n";
 	//char* placeholderCommand = "g shortfile.txt\n";
 	//char* placeholderCommand = "g longfileee.txt\n";
 	//char* placeholderCommand = "bleraharea!34r\n";
+	char portString[5];
+	int clientPort; 
 
 	char fileName[FILE_SIZE];
 	char buffer[BUFFER_SIZE];
@@ -167,6 +169,13 @@ int handleRequest(int new_fd, char clientHost[], int clientPort) {
 	memset(fileName, '\0', sizeof fileName);
 	memset(buffer, '\0', sizeof buffer);
 	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
+
+	memcpy(portString, buffer+(strlen(buffer)-5), 5);
+	int i;
+	for(i = 0; i < strlen(portString)+1; i++) {
+		printf("%i:	%c	%d\n", i, portString[i], portString[i]);
+	}
+	clientPort = atoi(portString);	
 
 
 	if (strncmp(buffer, "l", 1) == 0) {
@@ -182,6 +191,7 @@ int handleRequest(int new_fd, char clientHost[], int clientPort) {
 				memcpy(fileName, buffer+2, strlen(buffer)-8);	//get fileName - starts after 'g ' and before ' #####\n'
 				fileName[strlen(buffer)-8] = '\0';
 				printf("%s\n", fileName);
+				/*
 				int i;
 				for(i = 0; i < strlen(buffer)+1; i++) {
 					printf("%i:	%c	%d\n", i, buffer[i], buffer[i]);
@@ -190,6 +200,7 @@ int handleRequest(int new_fd, char clientHost[], int clientPort) {
 				for(i = 0; i < strlen(fileName)+1; i++) {
 					printf("%i:	%c	%d\n", i, fileName[i], fileName[i]);
 				}
+				*/
 
 				//send error message if not found 
 				if (!findFile(fileName)) {
@@ -251,7 +262,7 @@ int main(int argc, char *argv[]) {
     char s[INET_ADDRSTRLEN];
 
     char clientHost[1024], clientService[20];	//getnameinfo
-    int clientPort;
+    //int clientPort;
 
     //validate command line parameters
     if (argc != 2) { fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); } 
@@ -295,14 +306,14 @@ int main(int argc, char *argv[]) {
 
 		//get name of client host and port number 
 		getnameinfo((struct sockaddr *)&their_addr, sizeof their_addr, clientHost, sizeof clientHost, clientService, sizeof clientService, 0); 
-		clientPort = ntohs(their_addr.sin_port); 
+		//clientPort = ntohs(their_addr.sin_port); 
 		//printf("%d\n", clientPort);
 
 		printf("Connection from %s.\n", clientHost);
 
 		//wait on connection P for command from ftclient 
 
-		handleRequest(new_fd, clientHost, clientPort);
+		handleRequest(new_fd, clientHost);
 
 		//close connection P and terminate
 		close(new_fd);  
