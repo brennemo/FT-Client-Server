@@ -111,15 +111,29 @@ int findFile(char* fileName) {
 void readFile(char *fileName) {
 	FILE* requestedFile = fopen(fileName, "r");
 	char fileLine[BUFFER_SIZE];
+	char completeFile[10000];
 
-	int i = 0; 
+	//int i = 0; 
+	memset(fileLine, '\0', sizeof fileLine);
+	memset(completeFile, '\0', sizeof completeFile);
 
 	while (fgets(fileLine, sizeof fileLine, requestedFile)) {
-		printf("%s 	%d\n", fileLine, i++);
+		strcat(completeFile, fileLine);
+		//printf("%s 	%d\n", fileLine, i++);
 		memset(fileLine, '\0', sizeof fileLine);
 	}
 
 	fclose(requestedFile);
+
+	printf("%s", completeFile);
+
+	/*
+	sentLength = 0;
+	while (sentLength <= strlen(encryptedMessage)) {
+		charsRead = send(establishedConnectionFD, encryptedMessage, strlen(encryptedMessage), 0); 
+		sentLength += charsRead;
+	}
+	*/
 }
 
 
