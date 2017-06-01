@@ -211,6 +211,7 @@ void sendFile(char* fileName, char* host, char* port) {
         printf("%d bytes sent. Total = %d. %d bytes left to send.\n", n, total, bytesleft);
     }
     n = send(q_fd, "@@", 3, 0);
+    printf("@@\n");
 
     //*len = total; // return number actually sent here
 

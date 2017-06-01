@@ -74,12 +74,13 @@ def receiveFile(conn, argv):
 
 	response = ''
 	while '@@' not in response:
+		f.write(response)
 		response = ''
 		response = conn.recv(1000)
 		if '@@' in response:
-			response = response[:-3]	#trim @@ from end of string 
-		f.write(response)
-		#print '\n' + response	#test print  
+			print 'end!'
+
+		#print response	#test print  
 
 	print 'transfer complete'
 	f.close()
