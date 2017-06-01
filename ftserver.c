@@ -174,7 +174,6 @@ unsigned long getFileSize(char* fileName) {
 	fseek(requestedFile, 0, SEEK_END);
 	fileSize = ftell(requestedFile);
 	fseek(requestedFile, 0, SEEK_SET);
-	//printf("file size: %lu\n", fileSize);
 	fclose(requestedFile);
 
 	return fileSize; 
@@ -196,9 +195,6 @@ void sendFile(char* fileName, char* host, char* port) {
 
     fileSize = getFileSize(fileName);
     printf("file size: %lu\n", fileSize);
-
-	memset(fileLine, '\0', sizeof fileLine);
-	memset(completeFile, '\0', sizeof completeFile);
 
 	q_fd = initiateOnDataConnection(host, port);
 
@@ -236,7 +232,7 @@ void sendFile(char* fileName, char* host, char* port) {
 int handleRequest(int new_fd, char* clientHost) {
 	char dataPort[6];
 
-	char fileName[FILE_SIZE];
+	char fileName[BUFFER_SIZE];
 	char buffer[BUFFER_SIZE];
 	char errorMessage[15] = "FILE NOT FOUND";
 

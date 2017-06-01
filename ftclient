@@ -70,7 +70,7 @@ def receiveFile(conn, argv):
 	"""
 		#createFile(argv[4], response)
 		#f = open(fileName, 'w+')
-	f = open('testtransfershortest.txt', 'w+')
+	f = open('testtransferlongest.txt', 'w+')
 
 	response = ''
 	count = 0
