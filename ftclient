@@ -91,14 +91,6 @@ def receiveFile(conn, argv):
 def isDuplicateFile(fileName):
 	dir = os.listdir('.')
 	return fileName in dir
-"""
-def createFile(fileName, contents):
-	f = open(fileName, 'w+')
-	f.write(contents)
-
-	f.close()
-"""
-
 
 if __name__ == "__main__":	
 	#validate command line parameters 

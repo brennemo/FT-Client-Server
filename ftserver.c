@@ -20,6 +20,14 @@
 
 #define BUFFER_SIZE 1000
 
+/*
+** Function: 	
+**
+** Description: 
+**				
+** Parameters: 	
+** Returns: 	
+*/
 void catchSIGINT(int signo) {
 	//foreground signal terminates self
 		puts("\nForeground signal terminating.\n");				
@@ -33,8 +41,18 @@ void *get_in_addr(struct sockaddr *sa) {
 	return &(((struct sockaddr_in*)sa)->sin_addr);
 }
 
+
+/*
+** Function: 	fillAddrStruct
+**
+** Description: 
+**				
+** Parameters: 	port: port number specified in command line 
+** Returns: 	pointer to addrinfo to use to create socket 
+*/
+
 struct addrinfo* fillAddrStruct(char *port) { 
-    struct addrinfo hints, *servinfo; //*p;
+    struct addrinfo hints, *servinfo; 
     struct sigaction sa;
     int rv;
 
@@ -52,6 +70,15 @@ struct addrinfo* fillAddrStruct(char *port) {
     return servinfo;
 }
 
+
+/*
+** Function: 	startup
+**
+** Description: creates and binds socket
+**				
+** Parameters: 	servinfo: pointer returned by fillAddrStruct 
+** Returns: 	sockfd: socket file descriptor 
+*/
 int startup(struct addrinfo *servinfo) {
 	int sockfd;  
 
@@ -70,6 +97,16 @@ int startup(struct addrinfo *servinfo) {
     return sockfd; 
 }
 
+
+/*
+** Function:	initiateOnDataConnection 	
+**
+** Description: connects to data connection running on client 
+**				
+** Parameters: 	host: client's host 
+**				port: port number of data connection, specified by client 
+** Returns: 	socketfd: socket file descriptor 
+*/
 int initiateOnDataConnection(char *host, char *port) {
 	struct addrinfo hints, *res;
 	char ipstr[INET_ADDRSTRLEN];
@@ -105,9 +142,19 @@ int initiateOnDataConnection(char *host, char *port) {
 	freeaddrinfo(res);						//free linked list
 	
 	return socketfd;
-	
 }
 
+
+/*
+** Function: 	sendFileNames
+**
+** Description: reads file names from current directory, stores names in 
+**				a string delimited by newlines, and sends string to client 
+**				
+** Parameters: 	host: client's host 
+**				port: port number of data connection, specified by client 
+** Returns: 	none 
+*/
 void sendFileNames(char* host, char* port) {
 	int q_fd;						//data connection file descriptor 
 	char fileNames[BUFFER_SIZE];
@@ -139,20 +186,18 @@ void sendFileNames(char* host, char* port) {
 	send(q_fd, fileNames, strlen(fileNames), 0); 
 
 	close(q_fd);
-
-	/*
-	int sentLength = 0;
-	int charsRead = 0;
-	while (sentLength <= strlen(fileNames)) {
-		charsRead = send(fd, fileNames, strlen(fileNames), 0); 
-		sentLength += charsRead;
-	}
-	*/
-
-	//close connection 
-	
 }
 
+
+/*
+** Function: 	findFile
+**
+** Description: searches for file in the current directory
+**				and returns the result 
+**				
+** Parameters: 	fileName: name of file to search for 
+** Returns: 	1 if found, 0 if not found 
+*/
 int findFile(char* fileName) {
 	DIR *dp;
 	struct dirent *ep;
@@ -167,6 +212,15 @@ int findFile(char* fileName) {
 	return 0;	//file not found 
 }
 
+
+/*
+** Function: 	getFileSize
+**
+** Description: gets the size of the file to be sent to the client 
+**				
+** Parameters: 	fileName: name of file to open
+** Returns: 	size of file 
+*/
 unsigned long getFileSize(char* fileName) {
 	unsigned long fileSize; 
 	FILE* requestedFile = fopen(fileName, "r");
@@ -180,7 +234,18 @@ unsigned long getFileSize(char* fileName) {
 }
 
 
-void sendFile(char* fileName, char* host, char* port) {
+/*
+** Function: 	sendFile
+**
+** Description: connects to client on data connection, then repeatedly 
+**				reads and sends 1000-byte chunks of file to client 
+**				
+** Parameters: 	fileName: name of file to send 
+** Parameters: 	host: client's host 
+**				port: port number of data connection, specified by client 
+** Returns: 	0 on success, 1 on failure 
+*/
+int sendFile(char* fileName, char* host, char* port) {
 	int q_fd;						//data connection file descriptor
 
 	FILE* requestedFile = fopen(fileName, "r");
@@ -188,10 +253,8 @@ void sendFile(char* fileName, char* host, char* port) {
 
 	unsigned long fileSize; 
 	int count = 0;
-	int len;
-	int total = 0;        // how many bytes we've sent
-    int bytesleft = len; // how many we have left to send
-    int n;
+	int len, bytesleft, n;
+	int total = 0;        	// how many bytes we've sent
 
     fileSize = getFileSize(fileName);
     printf("file size: %lu\n", fileSize);
@@ -201,9 +264,12 @@ void sendFile(char* fileName, char* host, char* port) {
 	printf("Sending \"%s\" to %s:%s\n", fileName, host, port); 
 
 	len = fileSize;
+	bytesleft = len;
     printf("complete file length: %d bytes\n", len);
 
     memset(fileLine, '\0', sizeof fileLine);
+
+    //read and send 1000-byte chunks until bytes sent reaches the size of the file 
     while(total < len) {
 		fgets(fileLine, sizeof fileLine, requestedFile);
 
@@ -216,19 +282,27 @@ void sendFile(char* fileName, char* host, char* port) {
 
         memset(fileLine, '\0', sizeof fileLine);
     }
-    n = send(q_fd, "@@", 3, 0);
-    printf("%d bytes sent. Total = %d in %d send()s. %d bytes left to send.\n", n, total, count, bytesleft);
+   	send(q_fd, "@@", 3, 0);
+    printf("%d bytes sent. Total = %d in %d send()s. %d bytes left to send.\n", n, total, ++count, bytesleft);
    
     printf("@@\n");
 
-    //*len = total; // return number actually sent here
-
-    //return n==-1?-1:0;
     fclose(requestedFile);
 	close(q_fd);
+
+	return n==-1?-1:0;
 }
 
 
+/*
+** Function: 	handleRequest	
+**
+** Description: gets and parses client's, checks options, and completes 
+**				requested transfer 
+**				
+** Parameters: 	
+** Returns: 	
+*/
 int handleRequest(int new_fd, char* clientHost) {
 	char dataPort[6];
 
@@ -275,7 +349,7 @@ int handleRequest(int new_fd, char* clientHost) {
 			//send file to client 
 				printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
 				//printf("Sending \"%s\" to %s:%s\n", fileName, clientHost, dataPort); 
-				sendFile(fileName, clientHost, dataPort);
+				if (sendFile(fileName, clientHost, dataPort) == 1 ) { printf("error: send file\n"); return 1; }
 			}
 		} else {
 			printf("error: missing file name\n");	
