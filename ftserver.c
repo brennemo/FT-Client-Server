@@ -285,7 +285,7 @@ int sendFile(char* fileName, char* host, char* port) {
 
         memset(fileLine, '\0', sizeof fileLine);
     }
-   	send(q_fd, "@@", 3, 0);
+   	send(q_fd, "@@", 3, 0);				//"@@" lets client know this is the end of the transfer 
     printf("%d bytes sent. Total = %d in %d send()s. %d bytes left to send.\n", n, total, ++count, bytesleft);
    
     printf("@@\n");
@@ -315,20 +315,14 @@ int handleRequest(int new_fd, char* clientHost) {
 
 	memset(fileName, '\0', sizeof fileName);
 	memset(buffer, '\0', sizeof buffer);
+
+	//get command from client 
 	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
 
-	//copy port number (last 5 characters) and convert to int 
+	//copy port number (last 5 characters)  
 	memset(dataPort, '\0', sizeof dataPort);
-	int i;
-
 	memcpy(dataPort, buffer+(strlen(buffer)-5), 5);
-	printf("buffer... %s\n", buffer);
-
-	printf("data port in handleRequest: %s\n", dataPort);
-
-	for(i = 0; i < strlen(dataPort)+1; i++) {
-		printf("%c	%d\n", dataPort[i], dataPort[i]);
-	}
+	//printf("buffer... %s\n", buffer);
 
 	//send directory contents 
 	if (strncmp(buffer, "l", 1) == 0) {
@@ -339,9 +333,8 @@ int handleRequest(int new_fd, char* clientHost) {
 	else if (strncmp(buffer, "g", 1) == 0) {
 		//copy file name into buffer 
 		if (strlen(buffer) > 1) {
-			memcpy(fileName, buffer+2, strlen(buffer)-8);	//get fileName - starts after 'g ' and before ' #####\n'
+			memcpy(fileName, buffer+2, strlen(buffer)-8);	//get fileName - starts after 'g ' and before port ' #####\n'
 			fileName[strlen(buffer)-8] = '\0';
-			//printf("%s\n", fileName);
 
 			//send error message if not found 
 			if (!findFile(fileName)) {
@@ -352,30 +345,18 @@ int handleRequest(int new_fd, char* clientHost) {
 			} else {
 			//send file to client 
 				printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
-				//printf("Sending \"%s\" to %s:%s\n", fileName, clientHost, dataPort); 
 				if (sendFile(fileName, clientHost, dataPort) == -1 ) { printf("error: send file\n"); return 1; }
 			}
 		} else {
 			printf("error: missing file name\n");	
 			return 1; 
 		}
-
-		/*
-		int i;
-		for(i = 0; i < strlen(buffer)+1; i++) {
-			printf("%c	%d\n", buffer[i], buffer[i]);
-		}
-		*/
-
-
 	}
 	else {
 		printf("error: invalid command\n");
 		return 1;
 	}
-
 	return 0;
-
 }
 
 
@@ -400,17 +381,14 @@ int main(int argc, char *argv[]) {
     char s[INET_ADDRSTRLEN];
 
     char clientHost[1024], clientService[20];	//getnameinfo
-    //int clientPort;
 
     //validate command line parameters
     if (argc != 2) { fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); } 
+    
+    servinfo = fillAddrStruct(argv[1]);		//get addrinfo with port number 
+	sockfd = startup(servinfo);				//create and bind socket 
 
-    //fill struct 
-    servinfo = fillAddrStruct(argv[1]);
-    //create and bind socket 
-	sockfd = startup(servinfo);
-
-	freeaddrinfo(servinfo); // all done with this structure
+	freeaddrinfo(servinfo); 
 
 	if (servinfo == NULL) {
 		fprintf(stderr, "server: failed to bind\n");
@@ -427,7 +405,6 @@ int main(int argc, char *argv[]) {
 
 	//repeatedly wait on <PORTNUM> for client (until terminated by SIGINT)
 	while(1) {  
-		//wait on connection P for command from ftclient 
 		sin_size = sizeof their_addr;
 
 		//establish TCP control connection on <SERVER_PORT>, i.e., connection P
@@ -436,11 +413,6 @@ int main(int argc, char *argv[]) {
 			perror("accept");
 			continue;
 		}
-
-		
-		//inet_ntop(their_addr.ss_family,						//get IP address 
-		//	get_in_addr((struct sockaddr *)&their_addr),
-		//	s, sizeof s);
 
 		//get name of client host and port number 
 		getnameinfo((struct sockaddr *)&their_addr, sizeof their_addr, clientHost, sizeof clientHost, clientService, sizeof clientService, 0); 
@@ -453,8 +425,7 @@ int main(int argc, char *argv[]) {
 		//close connection P and terminate
 		close(new_fd);  
 	}
-	
-	
+
 	return 0;
 }
 

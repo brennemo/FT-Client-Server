@@ -9,6 +9,9 @@ import socket
 import os, sys
 
 def initiateContact(argv):
+	"""
+    Returns: socket file descriptor for control connection 
+    """   
 	HOST = argv[1]
 	PORT = int(argv[2])   
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,6 +29,9 @@ def startUp(port):
     return q 
 
 def makeRequest(s, argv): 
+	"""
+    Parses and formats command, sends to server via ctrl connection  
+    """   
 	if argv[3] == '-l':
 		cmd = ' '.join(argv[3:len(argv)])[1:]	#join args with spaces, trim '-' from option
 		print cmd
@@ -34,7 +40,7 @@ def makeRequest(s, argv):
 		q = startUp(int(argv[4]))		#wait for file list 
 
 		conn, addr = q.accept() 
-		response = conn.recv(1024)
+		response = conn.recv(1000)
 
 		print 'Receiving directory structure from ' + argv[1] + ':' + argv[2]
 		print '\n' + response	#test print  
@@ -59,6 +65,10 @@ def makeRequest(s, argv):
 
 
 def receiveFile(conn, argv): 
+	"""
+    Repeatedly receives 1000-byte chunks of string from server on data connection,
+    and stores them in the appropriate file 
+    """   
 	print 'Receiving ' + '\"' + argv[4] + '\" from ' + argv[1] + ':' + argv[2]
 
 	#handle duplicate file names
@@ -74,7 +84,7 @@ def receiveFile(conn, argv):
 
 	response = ''
 	count = 0
-	while '@@' not in response:
+	while '@@' not in response:			#'@@' from server signals end of transfer 
 		f.write(response)
 		print response
 		count += 1
