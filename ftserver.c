@@ -19,7 +19,7 @@
 #include <dirent.h>	
 
 #define BUFFER_SIZE 1000
-#define FILE_SIZE 10000
+#define FILE_SIZE 100000
 
 void catchSIGINT(int signo) {
 	//foreground signal terminates self
@@ -193,6 +193,26 @@ void sendFile(char* fileName, char* host, char* port) {
 	//test sending a short string without loop
 	printf("Sending \"%s\" to %s:%s\n", fileName, host, port); 
 	send(q_fd, completeFile, strlen(completeFile), 0);
+
+	int len = strlen(completeFile);
+	int total = 0;        // how many bytes we've sent
+    int bytesleft = len; // how many we have left to send
+    int n;
+
+    printf("complete file length: %d bytes\n", len);
+
+    while(total < len) {
+        n = send(q_fd, completeFile+total, bytesleft, 0);
+        if (n == -1) { break; }
+        total += n;
+        bytesleft -= n;
+
+        printf("%d bytes sent. Total = %d. %d bytes left to send.\n", n, total, bytesleft);
+    }
+
+    //*len = total; // return number actually sent here
+
+    //return n==-1?-1:0;
 
 	close(q_fd);
 

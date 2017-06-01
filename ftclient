@@ -60,19 +60,22 @@ def makeRequest(s, argv):
 
 def receiveFile(conn, argv): 
 	response = ''
-	response = conn.recv(1024)
+	response = conn.recv(10000)
 
 	print 'Receiving ' + '\"' + argv[4] + '\" from ' + argv[1] + ':' + argv[2]
 	print '\n' + response	#test print  
 
 	
 	#handle duplicate file names
+	"""
 	if isDuplicateFile(argv[4]):
 		print 'duplicate file name'
 		return 
 	else:
-		createFile(argv[4], response)
-		print 'transfer complete'
+
+	createFile(argv[4], response)
+	"""
+	print 'transfer complete'
 	return 
 
 def isDuplicateFile(fileName):
