@@ -167,7 +167,7 @@ int findFile(char* fileName) {
 	}
 	return 0;	//file not found 
 }
-/*
+
 unsigned long getFileSize(char* fileName) {
 	unsigned long fileSize; 
 	FILE* requestedFile = fopen(fileName, "r");
@@ -180,7 +180,7 @@ unsigned long getFileSize(char* fileName) {
 
 	return fileSize; 
 }
-*/
+
 
 void sendFile(char* fileName, char* host, char* port) {
 	int q_fd;						//data connection file descriptor
@@ -189,12 +189,15 @@ void sendFile(char* fileName, char* host, char* port) {
 	char fileLine[BUFFER_SIZE];
 	char completeFile[FILE_SIZE];
 
-	//unsigned long fileSize; 
+	unsigned long fileSize; 
 	int count = 0;
 	int len;
 	int total = 0;        // how many bytes we've sent
     int bytesleft = len; // how many we have left to send
     int n;
+
+    fileSize = getFileSize(fileName);
+    printf("file size: %lu\n", fileSize);
 
 	memset(fileLine, '\0', sizeof fileLine);
 	memset(completeFile, '\0', sizeof completeFile);
