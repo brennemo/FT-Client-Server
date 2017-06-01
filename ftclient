@@ -61,35 +61,38 @@ def makeRequest(s, argv):
 def receiveFile(conn, argv): 
 	print 'Receiving ' + '\"' + argv[4] + '\" from ' + argv[1] + ':' + argv[2]
 
-	response = ''
-	while '@@' not in response:
-		response = ''
-		response = conn.recv(1000)
-		print '\n' + response	#test print  
-
-	
 	#handle duplicate file names
 	"""
 	if isDuplicateFile(argv[4]):
 		print 'duplicate file name'
 		return 
 	else:
-
-	createFile(argv[4], response)
 	"""
+		#createFile(argv[4], response)
+		#f = open(fileName, 'w+')
+	f = open('testtransfer.txt', 'w+')
+
+	response = ''
+	while '@@' not in response:
+		response = ''
+		response = conn.recv(1000)
+		f.write(response)
+		#print '\n' + response	#test print  
+
 	print 'transfer complete'
+	f.close()
 	return 
 
 def isDuplicateFile(fileName):
 	dir = os.listdir('.')
 	return fileName in dir
-
+"""
 def createFile(fileName, contents):
 	f = open(fileName, 'w+')
 	f.write(contents)
 
 	f.close()
-
+"""
 
 
 if __name__ == "__main__":	
