@@ -83,6 +83,8 @@ int initiateOnDataConnection(char *host, char *port) {
 	hints.ai_flags = AI_PASSIVE; 
 	
 	//fill addrinfo struct 
+	printf("connection q host: %s, port: %s\n", host, port);
+
 	if (getaddrinfo(host, port, &hints, &res) != 0) {
 		fprintf(stderr,"error: getaddrinfo\n"); exit(1); 	
 	}
@@ -107,7 +109,7 @@ int initiateOnDataConnection(char *host, char *port) {
 	
 }
 
-void sendFileNames(char *host, char* port) {
+void sendFileNames(char* host, char* port) {
 	int q_fd;						//data connection file descriptor 
 	char fileNames[BUFFER_SIZE];
 	DIR *dp;
@@ -166,7 +168,7 @@ int findFile(char* fileName) {
 	return 0;	//file not found 
 }
 
-void sendFile(char *fileName, char *host, char* port) {
+void sendFile(char* fileName, char* host, char* port) {
 	int q_fd;						//data connection file descriptor
 
 	FILE* requestedFile = fopen(fileName, "r");
@@ -206,12 +208,7 @@ void sendFile(char *fileName, char *host, char* port) {
 
 
 int handleRequest(int new_fd, char* clientHost) {
-	//char* placeholderCommand = "l\n";
-	//char* placeholderCommand = "g shortfile.txt\n";
-	//char* placeholderCommand = "g longfileee.txt\n";
-	//char* placeholderCommand = "bleraharea!34r\n";
-	char dataPort[5];
-	//int clientPort; 
+	char dataPort[6];
 
 	char fileName[FILE_SIZE];
 	char buffer[BUFFER_SIZE];
@@ -222,16 +219,22 @@ int handleRequest(int new_fd, char* clientHost) {
 	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
 
 	//copy port number (last 5 characters) and convert to int 
-	memcpy(dataPort, buffer+(strlen(buffer)-5), 5);
-	//clientPort = atoi(portString);	
+	memset(dataPort, '\0', sizeof dataPort);
+	int i;
 
+	memcpy(dataPort, buffer+(strlen(buffer)-5), 5);
+	printf("buffer... %s\n", buffer);
+
+	printf("data port in handleRequest: %s\n", dataPort);
+
+	for(i = 0; i < strlen(dataPort)+1; i++) {
+		printf("%c	%d\n", dataPort[i], dataPort[i]);
+	}
 
 	if (strncmp(buffer, "l", 1) == 0) {
 		printf("List directory requested on port %s.\n", clientHost);
 		//printf("Sending directory contents to %s:%s\n", clientHost, dataPort);
 		sendFileNames(clientHost, dataPort);
-
-		//CONNECTION Q 
 	}
 	else if (strncmp(buffer, "g", 1) == 0) {
 		//copy file name into buffer 
@@ -251,8 +254,6 @@ int handleRequest(int new_fd, char* clientHost) {
 				printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
 				//printf("Sending \"%s\" to %s:%s\n", fileName, clientHost, dataPort); 
 				sendFile(fileName, clientHost, dataPort);
-
-				//CONNECTION Q
 			}
 		} else {
 			printf("error: missing file name\n");	

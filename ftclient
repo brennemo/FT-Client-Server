@@ -69,23 +69,20 @@ def receiveFile(conn, argv):
 	#handle duplicate file names
 	if isDuplicateFile(argv[4]):
 		print 'duplicate file name'
+		return 
 	else:
-		createFile(argv[4])
+		createFile(argv[4], response)
 		print 'transfer complete'
-
-
-	#save file received on connection Q in current default directory 
-
-	#display 'transfer complete' message 
-
 	return 
 
 def isDuplicateFile(fileName):
 	dir = os.listdir('.')
 	return fileName in dir
 
-def createFile(fileName):
-	f = open('blorps.txt', 'w+')
+def createFile(fileName, contents):
+	f = open(fileName, 'w+')
+	f.write(contents)
+
 	f.close()
 
 
@@ -99,14 +96,10 @@ if __name__ == "__main__":
 	"""
 
 	#establish TCP control connection on <SERVER_PORT>, i.e., connection P
-	#s = initiateContact(sys.argv)
-	#makeRequest(s, sys.argv)
+	s = initiateContact(sys.argv)
+	makeRequest(s, sys.argv)
 	
-	#test
-	print isDuplicateFile('shortfile.txt')
-	createFile('blorps.txt')
-
-	#s.close()
+	s.close()
 	#print 'Received', repr(response)
 	
 
