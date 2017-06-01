@@ -191,7 +191,7 @@ void sendFile(char* fileName, char* host, char* port) {
 
 	//unsigned long fileSize; 
 	int count = 0;
-	int len = strlen(completeFile);
+	int len;
 	int total = 0;        // how many bytes we've sent
     int bytesleft = len; // how many we have left to send
     int n;
@@ -211,6 +211,7 @@ void sendFile(char* fileName, char* host, char* port) {
 
 	printf("Sending \"%s\" to %s:%s\n", fileName, host, port); 
 
+	len = strlen(completeFile);
     printf("complete file length: %d bytes\n", len);
 
     while(total < len) {
