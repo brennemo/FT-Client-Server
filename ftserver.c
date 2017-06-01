@@ -167,6 +167,20 @@ int findFile(char* fileName) {
 	}
 	return 0;	//file not found 
 }
+/*
+unsigned long getFileSize(char* fileName) {
+	unsigned long fileSize; 
+	FILE* requestedFile = fopen(fileName, "r");
+
+	fseek(requestedFile, 0, SEEK_END);
+	fileSize = ftell(requestedFile);
+	fseek(requestedFile, 0, SEEK_SET);
+	//printf("file size: %lu\n", fileSize);
+	fclose(requestedFile);
+
+	return fileSize; 
+}
+*/
 
 void sendFile(char* fileName, char* host, char* port) {
 	int q_fd;						//data connection file descriptor
@@ -174,6 +188,13 @@ void sendFile(char* fileName, char* host, char* port) {
 	FILE* requestedFile = fopen(fileName, "r");
 	char fileLine[BUFFER_SIZE];
 	char completeFile[FILE_SIZE];
+
+	//unsigned long fileSize; 
+	int count = 0;
+	int len = strlen(completeFile);
+	int total = 0;        // how many bytes we've sent
+    int bytesleft = len; // how many we have left to send
+    int n;
 
 	memset(fileLine, '\0', sizeof fileLine);
 	memset(completeFile, '\0', sizeof completeFile);
@@ -189,12 +210,6 @@ void sendFile(char* fileName, char* host, char* port) {
 	q_fd = initiateOnDataConnection(host, port);
 
 	printf("Sending \"%s\" to %s:%s\n", fileName, host, port); 
-
-	int count = 0;
-	int len = strlen(completeFile);
-	int total = 0;        // how many bytes we've sent
-    int bytesleft = len; // how many we have left to send
-    int n;
 
     printf("complete file length: %d bytes\n", len);
 
