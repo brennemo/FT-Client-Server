@@ -85,8 +85,8 @@ def isDuplicateFile(fileName):
 	return fileName in dir
 
 def createFile(fileName):
-	#f = open('blorps.txt')
-	#f.close()
+	f = open('blorps.txt', 'w+')
+	f.close()
 
 
 
