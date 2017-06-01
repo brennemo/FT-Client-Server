@@ -76,12 +76,12 @@ def receiveFile(conn, argv):
 	count = 0
 	while '@@' not in response:
 		f.write(response)
+		print response
 		count += 1
 		response = ''
 		response = conn.recv(1000)
 		if '@@' in response:
 			print 'end!'
-
 		#print response	#test print  
 	print 'count = ' + str(count)
 	print 'transfer complete'

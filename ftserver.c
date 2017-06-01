@@ -186,13 +186,9 @@ void sendFile(char* fileName, char* host, char* port) {
 
 	fclose(requestedFile);
 
-	//printf("%s", completeFile);
-
 	q_fd = initiateOnDataConnection(host, port);
 
-	//test sending a short string without loop
 	printf("Sending \"%s\" to %s:%s\n", fileName, host, port); 
-	send(q_fd, completeFile, strlen(completeFile), 0);
 
 	int count = 0;
 	int len = strlen(completeFile);
@@ -205,14 +201,17 @@ void sendFile(char* fileName, char* host, char* port) {
     while(total < len) {
         //n = send(q_fd, completeFile+total, bytesleft, 0);
         n = send(q_fd, completeFile+total, BUFFER_SIZE, 0);
+
         if (n == -1) { break; }
         total += n;
         bytesleft -= n;
         count++;
 
-        printf("%d bytes sent in %d send()s. Total = %d. %d bytes left to send.\n", n, count, total, bytesleft);
+        //printf("%d bytes sent. Total = %d in %d send()s. %d bytes left to send.\n", n, total, count, bytesleft);
     }
     n = send(q_fd, "@@", 3, 0);
+    printf("%d bytes sent. Total = %d in %d send()s. %d bytes left to send.\n", n, total, count, bytesleft);
+   
     printf("@@\n");
 
     //*len = total; // return number actually sent here
