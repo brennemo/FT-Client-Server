@@ -146,20 +146,21 @@ int initiateOnDataConnection(char *host, char *port) {
 
 
 /*
-** Function: 	sendFileNames
+** Function: 	listDirectory
 **
 ** Description: reads file names from current directory, stores names in 
 **				a string delimited by newlines, and sends string to client 
 **				
 ** Parameters: 	host: client's host 
 **				port: port number of data connection, specified by client 
-** Returns: 	none 
+** Returns: 	0 on success, -1 on failure 
 */
-void sendFileNames(char* host, char* port) {
+int listDirectory(char* host, char* port) {
 	int q_fd;						//data connection file descriptor 
 	char fileNames[BUFFER_SIZE];
 	DIR *dp;
 	struct dirent *ep;
+	int n;
 
 	memset(fileNames, '\0', sizeof fileNames);
 
@@ -183,9 +184,11 @@ void sendFileNames(char* host, char* port) {
 
 	//test sending a short string without loop
 	printf("Sending directory contents to %s:%s\n", host, port);
-	send(q_fd, fileNames, strlen(fileNames), 0); 
+	n = send(q_fd, fileNames, strlen(fileNames), 0); 
 
 	close(q_fd);
+
+	return n==-1?-1:0;
 }
 
 
@@ -243,7 +246,7 @@ unsigned long getFileSize(char* fileName) {
 ** Parameters: 	fileName: name of file to send 
 ** Parameters: 	host: client's host 
 **				port: port number of data connection, specified by client 
-** Returns: 	0 on success, 1 on failure 
+** Returns: 	0 on success, -1 on failure 
 */
 int sendFile(char* fileName, char* host, char* port) {
 	int q_fd;						//data connection file descriptor
@@ -327,11 +330,12 @@ int handleRequest(int new_fd, char* clientHost) {
 		printf("%c	%d\n", dataPort[i], dataPort[i]);
 	}
 
+	//send directory contents 
 	if (strncmp(buffer, "l", 1) == 0) {
 		printf("List directory requested on port %s.\n", clientHost);
-		//printf("Sending directory contents to %s:%s\n", clientHost, dataPort);
-		sendFileNames(clientHost, dataPort);
+		if (listDirectory(clientHost, dataPort) == -1) { printf("error: list directory\n"); return 1; };
 	}
+	//send file 
 	else if (strncmp(buffer, "g", 1) == 0) {
 		//copy file name into buffer 
 		if (strlen(buffer) > 1) {
@@ -343,13 +347,13 @@ int handleRequest(int new_fd, char* clientHost) {
 			if (!findFile(fileName)) {
 				printf("File not found. Sending error message to %s:%s\n", clientHost, dataPort);
 				printf("%s\n", errorMessage);
-				send(new_fd, errorMessage, strlen(errorMessage), 0);
+				//send(new_fd, errorMessage, strlen(errorMessage), 0);
 				return 1; 
 			} else {
 			//send file to client 
 				printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
 				//printf("Sending \"%s\" to %s:%s\n", fileName, clientHost, dataPort); 
-				if (sendFile(fileName, clientHost, dataPort) == 1 ) { printf("error: send file\n"); return 1; }
+				if (sendFile(fileName, clientHost, dataPort) == -1 ) { printf("error: send file\n"); return 1; }
 			}
 		} else {
 			printf("error: missing file name\n");	
