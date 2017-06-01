@@ -198,33 +198,45 @@ void sendFile(char* fileName, char* host, char* port) {
 
     fileSize = getFileSize(fileName);
     printf("file size: %lu\n", fileSize);
+    //int buffers = fileSize / BUFFER_SIZE;
+    //if (fileSize % BUFFER_SIZE > 0) buffers++;
+    //printf("num buffers: %d\n", buffers);
 
 	memset(fileLine, '\0', sizeof fileLine);
 	memset(completeFile, '\0', sizeof completeFile);
 
 	//build single string containing all lines of the file 
+	/*
 	while (fgets(fileLine, sizeof fileLine, requestedFile)) {
 		strcat(completeFile, fileLine);
 		memset(fileLine, '\0', sizeof fileLine);
 	}
+	*/
 
-	fclose(requestedFile);
+	//fclose(requestedFile);
 
 	q_fd = initiateOnDataConnection(host, port);
 
 	printf("Sending \"%s\" to %s:%s\n", fileName, host, port); 
 
-	len = strlen(completeFile);
+	//len = strlen(completeFile);
+	len = fileSize;
     printf("complete file length: %d bytes\n", len);
 
+    memset(fileLine, '\0', sizeof fileLine);
     while(total < len) {
         //n = send(q_fd, completeFile+total, bytesleft, 0);
-        n = send(q_fd, completeFile+total, BUFFER_SIZE, 0);
+		fgets(fileLine, sizeof fileLine, requestedFile);
+
+        //n = send(q_fd, completeFile+total, BUFFER_SIZE, 0);
+        n = send(q_fd, fileLine, BUFFER_SIZE, 0);
 
         if (n == -1) { break; }
         total += n;
         bytesleft -= n;
         count++;
+
+        memset(fileLine, '\0', sizeof fileLine);
 
         //printf("%d bytes sent. Total = %d in %d send()s. %d bytes left to send.\n", n, total, count, bytesleft);
     }
@@ -236,7 +248,7 @@ void sendFile(char* fileName, char* host, char* port) {
     //*len = total; // return number actually sent here
 
     //return n==-1?-1:0;
-
+    fclose(requestedFile);
 	close(q_fd);
 
 	/*
