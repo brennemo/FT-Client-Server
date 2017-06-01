@@ -19,7 +19,7 @@
 #include <dirent.h>	
 
 #define BUFFER_SIZE 1000
-#define FILE_SIZE 100000
+#define FILE_SIZE 1000000
 
 void catchSIGINT(int signo) {
 	//foreground signal terminates self
