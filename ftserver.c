@@ -19,7 +19,7 @@
 #include <dirent.h>	
 
 #define BUFFER_SIZE 1000
-#define FILE_SIZE 1000000
+#define FILE_SIZE 600000
 
 void catchSIGINT(int signo) {
 	//foreground signal terminates self
@@ -202,13 +202,15 @@ void sendFile(char* fileName, char* host, char* port) {
     printf("complete file length: %d bytes\n", len);
 
     while(total < len) {
-        n = send(q_fd, completeFile+total, bytesleft, 0);
+        //n = send(q_fd, completeFile+total, bytesleft, 0);
+        n = send(q_fd, completeFile+total, BUFFER_SIZE, 0);
         if (n == -1) { break; }
         total += n;
         bytesleft -= n;
 
         printf("%d bytes sent. Total = %d. %d bytes left to send.\n", n, total, bytesleft);
     }
+    n = send(q_fd, "@@", 3, 0);
 
     //*len = total; // return number actually sent here
 

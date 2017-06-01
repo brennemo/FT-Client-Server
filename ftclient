@@ -59,11 +59,13 @@ def makeRequest(s, argv):
 
 
 def receiveFile(conn, argv): 
-	response = ''
-	response = conn.recv(10000)
-
 	print 'Receiving ' + '\"' + argv[4] + '\" from ' + argv[1] + ':' + argv[2]
-	print '\n' + response	#test print  
+
+	response = ''
+	while '@@' not in response:
+		response = ''
+		response = conn.recv(1000)
+		print '\n' + response	#test print  
 
 	
 	#handle duplicate file names
