@@ -11,5 +11,5 @@ https://docs.python.org/2/library/os.html
 
 gcc -o ftserver ftserver.c
 
-./ftclient localhost 34000 -g shortestfile.txt 340
-./ftclient localhost 34000 -g shorterfile.txt 340
+./ftclient localhost 35000 -g shortestfile.txt 350
+./ftclient localhost 35000 -g shorterfile.txt 350

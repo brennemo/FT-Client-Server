@@ -194,6 +194,7 @@ void sendFile(char* fileName, char* host, char* port) {
 	printf("Sending \"%s\" to %s:%s\n", fileName, host, port); 
 	send(q_fd, completeFile, strlen(completeFile), 0);
 
+	int count = 0;
 	int len = strlen(completeFile);
 	int total = 0;        // how many bytes we've sent
     int bytesleft = len; // how many we have left to send
@@ -207,8 +208,9 @@ void sendFile(char* fileName, char* host, char* port) {
         if (n == -1) { break; }
         total += n;
         bytesleft -= n;
+        count++;
 
-        printf("%d bytes sent. Total = %d. %d bytes left to send.\n", n, total, bytesleft);
+        printf("%d bytes sent in %d send()s. Total = %d. %d bytes left to send.\n", n, count, total, bytesleft);
     }
     n = send(q_fd, "@@", 3, 0);
     printf("@@\n");
