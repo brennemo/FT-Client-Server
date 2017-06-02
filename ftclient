@@ -106,9 +106,8 @@ def receiveFile(conn, argv):
 	if isDuplicateFile(argv[4]):
 		print 'duplicate file name'
 		return 
-	else:
-		createFile(argv[4], response)
-		f = open(fileName, 'w+')
+
+	f = open(argv[4], 'w+')
 
 	response = ''
 	count = 0

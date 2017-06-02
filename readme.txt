@@ -17,3 +17,5 @@ gcc -o ftserver ftserver.c
 
 ./ftclient localhost 50014 -g longfile.txt 45
 ./ftclient localhost 50014 -g longestfile.txt 45
+
+./ftclient flip1.engr.oregonstate.edu 31022 
