@@ -17,7 +17,7 @@ def checkArgs(argv):
 	elif argv[3] != '-l' and argv[3] != '-g' :
 		return 1
 
-	#ports are numbers and not reserved ports or out of range 
+	#ports are numbers, not reserved ports, or out of range 
 	elif argv[2].isdigit() == False or int(argv[2]) < 1024 or int(argv[2]) > 65535:					
 		return 1
 

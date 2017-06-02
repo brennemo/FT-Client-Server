@@ -384,7 +384,12 @@ int main(int argc, char *argv[]) {
 
     //validate command line parameters
     if (argc != 2) { fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); } 
-    
+
+    //check that ports are numbers, not reserved ports, or out of range 
+	if (atoi(argv[1]) == 0 || atoi(argv[1]) < 1024 || atoi(argv[1]) > 65535) { 
+		fprintf(stderr,"USAGE: ./ftserver <SERVER_PORT>\n"); exit(1); 
+	}
+   
     servinfo = fillAddrStruct(argv[1]);		//get addrinfo with port number 
 	sockfd = startup(servinfo);				//create and bind socket 
 
@@ -425,7 +430,6 @@ int main(int argc, char *argv[]) {
 		//close connection P and terminate
 		close(new_fd);  
 	}
-
 	return 0;
 }
 
