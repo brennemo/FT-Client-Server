@@ -8,6 +8,31 @@ import signal
 import socket
 import os, sys
 
+def checkArgs(argv):
+	#check # of args 
+	if len(argv) < 5:
+		return 1
+
+	#check for valid command 
+	elif argv[3] != '-l' and argv[3] != '-g' :
+		return 1
+
+	#ports are numbers and not reserved ports or out of range 
+	elif argv[2].isdigit() == False or int(argv[2]) < 1024 or int(argv[2]) > 65535:					
+		return 1
+
+	elif argv[len(argv) - 1].isdigit() == False or int(argv[len(argv) - 1]) < 1024 or int(argv[len(argv) - 1]) > 65535:		
+		print 'DATA_PORT'
+		print usage
+		exit(1)
+
+	#check for file name 
+	elif argv[3] == '-g' and len(argv) < 6: 
+		return 1
+
+	else: 
+		return 0
+
 def initiateContact(argv):
 	"""
     Returns: socket file descriptor for control connection 
@@ -104,43 +129,17 @@ def isDuplicateFile(fileName):
 
 if __name__ == "__main__":	
 	#validate command line parameters 
-	usage = 'USAGE: ./ftclient <SERVER_HOST> <SERVER_PORT> <COMMAND> [FILENAME] <DATA_PORT>'
-
-	#check # of args 
-	if len(sys.argv) < 5:
-		print 'NUMBER OF ARGS'
-		print usage
+	if checkArgs(sys.argv):
+		print 'USAGE: ./ftclient <SERVER_HOST> <SERVER_PORT> <COMMAND> [FILENAME] <DATA_PORT>'
 		exit(1)
 
-	#check for command 
-	if sys.argv[3] != '-l' and sys.argv[3] != '-g' :
-		print 'COMMANDS'
-		print usage
-		exit(1)
-
-	#ports are numbers and not reserved ports or out of range 
-	if sys.argv[2].isdigit() == False or int(sys.argv[2]) < 1024 or int(sys.argv[2]) > 65535:					
-		print 'SERVER_PORT'
-		print usage
-		exit(1)
-
-	if sys.argv[len(sys.argv) - 1].isdigit() == False or int(sys.argv[len(sys.argv) - 1]) < 1024 or int(sys.argv[len(sys.argv) - 1]) > 65535:		
-		print 'DATA_PORT'
-		print usage
-		exit(1)
-
-	#check for file name 
-	if sys.argv[3] == '-g' and len(sys.argv) < 6: 
-		print 'FILENAME'
-		print usage
-		exit(1)
-	
 
 	#establish TCP control connection on <SERVER_PORT>, i.e., connection P
 	s = initiateContact(sys.argv)
 	makeRequest(s, sys.argv)
 	
 	s.close()
+	
 	
 	#print 'Received', repr(response)
 	
