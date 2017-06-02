@@ -257,17 +257,28 @@ int sendFile(char* fileName, char* host, char* port) {
 
     //read and send 1000-byte chunks until bytes sent reaches the size of the file 
     while(total < len) {
-		fgets(fileLine, sizeof fileLine, requestedFile);
+		fgets(fileLine, (sizeof fileLine) - 1, requestedFile);
 
-        n = send(q_fd, fileLine, BUFFER_SIZE, 0);
+        //n = send(q_fd, fileLine, BUFFER_SIZE, 0);
+        n = send(q_fd, fileLine, strlen(fileLine), 0);
 
         if (n == -1) { break; }
         total += n;
         bytesleft -= n;
         count++;
 
+        printf("line: %s\n", fileLine);
         memset(fileLine, '\0', sizeof fileLine);
     }
+    /*
+    fgets(fileLine, (sizeof fileLine) - 1, requestedFile);
+    n = send(q_fd, fileLine, BUFFER_SIZE, 0);
+    total += n;
+    bytesleft -= n;
+    count++;
+    printf("line: %s\n", fileLine);
+    */
+
    	send(q_fd, "@@", 3, 0);				//"@@" lets client know this is the end of the transfer 
     printf("%d bytes sent. Total = %d in %d send()s. %d bytes left to send.\n", n, total, ++count, bytesleft);
    
@@ -341,7 +352,8 @@ int handleRequest(int new_fd, char* clientHost) {
 		if (!findFile(fileName)) {
 			fprintf(stderr, "File not found. Sending error message to %s:%s\n", clientHost, dataPort);
 			printf("%s\n", errorMessage);
-			//send(new_fd, errorMessage, strlen(errorMessage), 0);
+
+			send(new_fd, errorMessage, strlen(errorMessage), 0);
 			return 1; 
 		} else {
 		//send file to client 
