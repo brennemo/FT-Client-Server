@@ -105,13 +105,13 @@ def receiveFile(conn, argv):
 	"""
 		#createFile(argv[4], response)
 		#f = open(fileName, 'w+')
-	f = open('t_shorter03.txt', 'w+')
+	f = open('t_long02.txt', 'w+')
 
 	response = ''
 	count = 0
 	while '@@' not in response:			#'@@' from server signals end of transfer 
 		f.write(response)
-		print response
+		#print response
 		count += 1
 		response = ''
 		response = conn.recv(1000)
