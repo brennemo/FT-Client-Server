@@ -22,9 +22,7 @@ def checkArgs(argv):
 		return 1
 
 	elif argv[len(argv) - 1].isdigit() == False or int(argv[len(argv) - 1]) < 1024 or int(argv[len(argv) - 1]) > 65535:		
-		print 'DATA_PORT'
-		print usage
-		exit(1)
+		return 1
 
 	#check for file name 
 	elif argv[3] == '-g' and len(argv) < 6: 
@@ -59,7 +57,6 @@ def makeRequest(s, argv):
     """   
 	if argv[3] == '-l':
 		cmd = ' '.join(argv[3:len(argv)])[1:]	#join args with spaces, trim '-' from option
-		#print cmd
 		s.send(cmd)
 
 		q = startUp(int(argv[4]))		#wait for file list 
@@ -68,19 +65,18 @@ def makeRequest(s, argv):
 		response = conn.recv(1000)
 
 		print 'Receiving directory structure from ' + argv[1] + ':' + argv[2]
-		print response	 
+		print response	 				#show directory listing 
 
 		conn.close() 
 
 	elif argv[3] == '-g':
 		cmd = ' '.join(argv[3:len(argv)])[1:]	#join args with spaces, trim '-' from option
-		print cmd 
 		s.send(cmd)
 
 		#HANDLE FILE NOT FOUND 
 		ok = s.recv(1000)
 		if 'ok' not in ok:
-			print ok
+			print ok					#should be error message 
 			return 
 
 		q = startUp(int(argv[5]))		#wait for files
@@ -110,17 +106,11 @@ def receiveFile(conn, argv):
 	f = open(argv[4], 'w+')
 
 	response = ''
-	count = 0
 	while '@@' not in response:			#'@@' from server signals end of transfer 
 		f.write(response)
-		#print response
-		count += 1
 		response = ''
 		response = conn.recv(1000)
-		if '@@' in response:
-			print 'end!'
-		#print response	#test print  
-	print 'count = ' + str(count)
+
 	print 'transfer complete'
 	f.close()
 	return 
@@ -139,6 +129,7 @@ def sigint_handler(signal, frame):
 signal.signal(signal.SIGINT, sigint_handler)
 
 if __name__ == "__main__":	
+	
 	#validate command line parameters 
 	if checkArgs(sys.argv):
 		print 'USAGE: ./ftclient <SERVER_HOST> <SERVER_PORT> <COMMAND> [FILENAME] <DATA_PORT>'
@@ -151,7 +142,3 @@ if __name__ == "__main__":
 	
 	s.close()
 	
-	
-	#print 'Received', repr(response)
-	
-
