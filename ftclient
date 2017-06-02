@@ -103,15 +103,12 @@ def receiveFile(conn, argv):
 	print 'Receiving ' + '\"' + argv[4] + '\" from ' + argv[1] + ':' + argv[2]
 
 	#handle duplicate file names
-	"""
 	if isDuplicateFile(argv[4]):
 		print 'duplicate file name'
 		return 
 	else:
-	"""
-		#createFile(argv[4], response)
-		#f = open(fileName, 'w+')
-	f = open('t_shortest02.txt', 'w+')
+		createFile(argv[4], response)
+		f = open(fileName, 'w+')
 
 	response = ''
 	count = 0
