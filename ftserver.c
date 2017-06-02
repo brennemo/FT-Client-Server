@@ -243,7 +243,6 @@ int sendFile(char* fileName, char* host, char* port) {
 	int total = 0;        	// how many bytes we've sent
 
     fileSize = getFileSize(fileName);
-    printf("file size: %lu\n", fileSize);
 
 	q_fd = initiateOnDataConnection(host, port);
 	if (q_fd == -1) { return -1; }
@@ -252,7 +251,6 @@ int sendFile(char* fileName, char* host, char* port) {
 
 	len = fileSize;
 	bytesleft = len;
-    printf("complete file length: %d bytes\n", len);
 
     memset(fileLine, '\0', sizeof fileLine);
 
