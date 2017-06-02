@@ -307,7 +307,12 @@ int handleRequest(int new_fd, char* clientHost) {
 		p = strtok (buffer, " ");			//command
 
 		p = strtok (NULL, " ");				//port
-		memcpy(dataPort, p, strlen(p));
+		if (p != NULL) {
+			memcpy(dataPort, p, strlen(p));	
+		} else {
+			fprintf(stderr, "error: data port");
+			return 1; 
+		}
 
 		printf("List directory requested on port %s.\n", clientHost);
 		if (listDirectory(clientHost, dataPort) == -1) { fprintf(stderr, "error: list directory\n"); return 1; };
@@ -317,10 +322,20 @@ int handleRequest(int new_fd, char* clientHost) {
 		p = strtok (buffer, " ");			//command
 
 		p = strtok (NULL, " ");				//file name
-		memcpy(fileName, p, strlen(p));	
+		if (p != NULL) {
+			memcpy(fileName, p, strlen(p));
+		} else {
+			fprintf(stderr, "error: file name");
+			return 1; 
+		}	
 
 		p = strtok (NULL, " ");				//port 
-		memcpy(dataPort, p, strlen(p));
+		if (p != NULL) {
+			memcpy(dataPort, p, strlen(p));
+		} else {
+			fprintf(stderr, "error: data port");
+			return 1; 
+		}
 
 		//send error message if not found 
 		if (!findFile(fileName)) {
