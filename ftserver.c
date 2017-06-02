@@ -308,10 +308,10 @@ int sendFile(char* fileName, char* host, char* port) {
 */
 int handleRequest(int new_fd, char* clientHost) {
 	char dataPort[6];
-
 	char fileName[BUFFER_SIZE];
 	char buffer[BUFFER_SIZE];
 	char errorMessage[15] = "FILE NOT FOUND";
+	char* p;									//ptr for stringtok 
 
 	memset(fileName, '\0', sizeof fileName);
 	memset(buffer, '\0', sizeof buffer);
@@ -320,39 +320,78 @@ int handleRequest(int new_fd, char* clientHost) {
 	recv(new_fd, buffer, BUFFER_SIZE - 1, 0);
 
 	//copy port number (last 5 characters)  
+	/*
 	memset(dataPort, '\0', sizeof dataPort);
 	memcpy(dataPort, buffer+(strlen(buffer)-5), 5);
+	*/
 	//printf("buffer... %s\n", buffer);
+	/*
+	p = strtok (buffer, " ");			//command
+	printf("buffer: %s\n", buffer); 
+
+	printf("buffer[0]: %c\n", buffer[0]);
+	if (strncmp(buffer, "l", 1) == 0) {
+		p = strtok (NULL, " ");				//file name
+		printf("buffer: %s\n", buffer); 
+		memcpy(fileName, p, strlen(p));	
+		printf("file name: %s\n", fileName);
+	}
+
+	p = strtok (NULL, " ");				//port 
+	printf("buffer: %s\n", buffer); 
+	memcpy(dataPort, p, strlen(p));
+	printf("port: %s\n", dataPort);
+	*/
 
 	//send directory contents 
 	if (strncmp(buffer, "l", 1) == 0) {
+		p = strtok (buffer, " ");			//command
+		printf("buffer: %s\n", buffer); 
+		p = strtok (NULL, " ");				//port
+		memcpy(dataPort, p, strlen(p));
+		printf("port: %s\n", dataPort);
+
+
 		printf("List directory requested on port %s.\n", clientHost);
 		if (listDirectory(clientHost, dataPort) == -1) { fprintf(stderr, "error: list directory\n"); return 1; };
 	}
 	//send file 
 	else if (strncmp(buffer, "g", 1) == 0) {
 		//copy file name into buffer 
-		if (strlen(buffer) > 1) {
-			memcpy(fileName, buffer+2, strlen(buffer)-8);	//get fileName - starts after 'g ' and before port ' #####\n'
-			fileName[strlen(buffer)-8] = '\0';
+		//if (strlen(buffer) > 1) {
+		//memcpy(fileName, buffer+2, strlen(buffer)-8);	//get fileName - starts after 'g ' and before port ' #####\n'
+		//fileName[strlen(buffer)-8] = '\0';
 
-			//send error message if not found 
-			if (!findFile(fileName)) {
-				fprintf(stderr, "File not found. Sending error message to %s:%s\n", clientHost, dataPort);
-				printf("%s\n", errorMessage);
-				//send(new_fd, errorMessage, strlen(errorMessage), 0);
-				return 1; 
-			} else {
-			//send file to client 
-				printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
-				if (sendFile(fileName, clientHost, dataPort) == -1 ) { fprintf(stderr, "error: send file\n"); return 1; }
-			}
+		p = strtok (buffer, " ");			//command
+		printf("buffer: %s\n", buffer); 
+
+		p = strtok (NULL, " ");				//file name
+		printf("buffer: %s\n", buffer); 
+		memcpy(fileName, p, strlen(p));	
+		printf("file name: %s\n", fileName);
+
+
+		p = strtok (NULL, " ");				//port 
+		printf("buffer: %s\n", buffer); 
+		memcpy(dataPort, p, strlen(p));
+		printf("port: %s\n", dataPort);
+
+		//send error message if not found 
+		if (!findFile(fileName)) {
+			fprintf(stderr, "File not found. Sending error message to %s:%s\n", clientHost, dataPort);
+			printf("%s\n", errorMessage);
+			//send(new_fd, errorMessage, strlen(errorMessage), 0);
+			return 1; 
 		} else {
+		//send file to client 
+			printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
+			if (sendFile(fileName, clientHost, dataPort) == -1 ) { fprintf(stderr, "error: send file\n"); return 1; }
+		}
+		/*} else {
 			fprintf(stderr, "error: missing file name\n");	
 			return 1; 
-		}
-	}
-	else {
+		}*/
+	} else {
 		fprintf(stderr, "error: invalid command\n");
 		return 1;
 	}
