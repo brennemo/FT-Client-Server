@@ -105,12 +105,12 @@ int initiateOnDataConnection(char *host, char *port) {
 	printf("connection q host: %s, port: %s\n", host, port);
 
 	if (getaddrinfo(host, port, &hints, &res) != 0) {
-		fprintf(stderr,"error: getaddrinfo\n"); exit(1); 	
+		fprintf(stderr,"error: getaddrinfo\n"); return -1; 	
 	}
 	
 	//create socket 
 	socketfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-	if (socketfd == -1) { fprintf(stderr,"error: socket\n"); exit(1); }
+	if (socketfd == -1) { fprintf(stderr,"error: socket\n"); return -1; }
 	
 	//establish connection 
 	//status = connect(socketfd, res->ai_addr, res->ai_addrlen);
@@ -118,7 +118,7 @@ int initiateOnDataConnection(char *host, char *port) {
 	if (connect(socketfd, res->ai_addr, res->ai_addrlen) == -1) {
 		fprintf(stderr,"error: data connection\n"); 
 		close(socketfd);
-		exit(1); 
+		return -1; 
 	}
 
 		
@@ -159,11 +159,12 @@ int listDirectory(char* host, char* port) {
 	}
 	else {
 		fprintf(stderr, "error: opendir\n");
-		exit(1);
+		return -1; 
 	}
 	//printf("%s", fileNames);
 
 	q_fd = initiateOnDataConnection(host, port);
+	if (q_fd == -1) { return -1; }
 
 	//test sending a short string without loop
 	printf("Sending directory contents to %s:%s\n", host, port);
@@ -245,6 +246,7 @@ int sendFile(char* fileName, char* host, char* port) {
     printf("file size: %lu\n", fileSize);
 
 	q_fd = initiateOnDataConnection(host, port);
+	if (q_fd == -1) { return -1; }
 
 	printf("Sending \"%s\" to %s:%s\n", fileName, host, port); 
 
