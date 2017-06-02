@@ -84,13 +84,13 @@ int startup(struct addrinfo *servinfo) {
 
 	if ((sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
 		servinfo->ai_protocol)) == -1) {
-		perror("server: socket");
+		fprintf(stderr, "server: socket");
 	}
 
 	//bind socket 
 	if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
 		close(sockfd);
-		perror("server: bind");
+		fprintf(stderr, "server: bind");
 		exit(1);
 	}
 
@@ -175,7 +175,7 @@ int listDirectory(char* host, char* port) {
 		(void)closedir(dp);
 	}
 	else {
-		perror("Couldn't read the directory");
+		fprintf(stderr, "error: opendir\n");
 		exit(1);
 	}
 	//printf("%s", fileNames);
@@ -327,7 +327,7 @@ int handleRequest(int new_fd, char* clientHost) {
 	//send directory contents 
 	if (strncmp(buffer, "l", 1) == 0) {
 		printf("List directory requested on port %s.\n", clientHost);
-		if (listDirectory(clientHost, dataPort) == -1) { printf("error: list directory\n"); return 1; };
+		if (listDirectory(clientHost, dataPort) == -1) { fprintf(stderr, "error: list directory\n"); return 1; };
 	}
 	//send file 
 	else if (strncmp(buffer, "g", 1) == 0) {
@@ -338,22 +338,22 @@ int handleRequest(int new_fd, char* clientHost) {
 
 			//send error message if not found 
 			if (!findFile(fileName)) {
-				printf("File not found. Sending error message to %s:%s\n", clientHost, dataPort);
+				fprintf(stderr, "File not found. Sending error message to %s:%s\n", clientHost, dataPort);
 				printf("%s\n", errorMessage);
 				//send(new_fd, errorMessage, strlen(errorMessage), 0);
 				return 1; 
 			} else {
 			//send file to client 
 				printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
-				if (sendFile(fileName, clientHost, dataPort) == -1 ) { printf("error: send file\n"); return 1; }
+				if (sendFile(fileName, clientHost, dataPort) == -1 ) { fprintf(stderr, "error: send file\n"); return 1; }
 			}
 		} else {
-			printf("error: missing file name\n");	
+			fprintf(stderr, "error: missing file name\n");	
 			return 1; 
 		}
 	}
 	else {
-		printf("error: invalid command\n");
+		fprintf(stderr, "error: invalid command\n");
 		return 1;
 	}
 	return 0;
@@ -396,7 +396,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (listen(sockfd, 1) == -1) {
-		perror("listen");
+		fprintf(stderr, "error: listen");
 		exit(1);
 	}
 
@@ -410,7 +410,7 @@ int main(int argc, char *argv[]) {
 		//establish TCP control connection on <SERVER_PORT>, i.e., connection P
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
 		if (new_fd == -1) {
-			perror("accept");
+			fprintf(stderr, "error: accept");
 			continue;
 		}
 
