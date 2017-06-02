@@ -348,7 +348,18 @@ int handleRequest(int new_fd, char* clientHost) {
 			send(new_fd, errorMessage, strlen(errorMessage), 0);
 			return 1; 
 		} else {
-		//send file to client 
+			send(new_fd, "ok", 3, 0);
+
+			//get ok to connect to data socket 
+			memset(buffer, '\0', sizeof buffer);
+			while (strcmp(buffer, "ok") != 0) {
+				printf("msg from client: %s\n", buffer);
+				memset(buffer, '\0', sizeof buffer);
+				recv(new_fd, buffer, BUFFER_SIZE - 1, 0);	
+			}
+			
+			printf("msg from client: %s\n", buffer);
+			//send file to client 
 			printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
 			if (sendFile(fileName, clientHost, dataPort) == -1 ) { fprintf(stderr, "error: send file\n"); return 1; }
 		}

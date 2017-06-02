@@ -59,7 +59,7 @@ def makeRequest(s, argv):
     """   
 	if argv[3] == '-l':
 		cmd = ' '.join(argv[3:len(argv)])[1:]	#join args with spaces, trim '-' from option
-		print cmd
+		#print cmd
 		s.send(cmd)
 
 		q = startUp(int(argv[4]))		#wait for file list 
@@ -68,7 +68,7 @@ def makeRequest(s, argv):
 		response = conn.recv(1000)
 
 		print 'Receiving directory structure from ' + argv[1] + ':' + argv[2]
-		print '\n' + response	#test print  
+		print response	 
 
 		conn.close() 
 
@@ -78,8 +78,14 @@ def makeRequest(s, argv):
 		s.send(cmd)
 
 		#HANDLE FILE NOT FOUND 
+		ok = s.recv(1000)
+		if 'ok' not in ok:
+			print ok
+			return 
 
 		q = startUp(int(argv[5]))		#wait for files
+
+		s.send('ok')
 
 		conn, addr = q.accept() 
 		receiveFile(conn, argv)
@@ -105,7 +111,7 @@ def receiveFile(conn, argv):
 	"""
 		#createFile(argv[4], response)
 		#f = open(fileName, 'w+')
-	f = open('t_long02.txt', 'w+')
+	f = open('t_shortest02.txt', 'w+')
 
 	response = ''
 	count = 0
