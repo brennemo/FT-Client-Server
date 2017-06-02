@@ -238,7 +238,6 @@ int sendFile(char* fileName, char* host, char* port) {
 	char fileLine[BUFFER_SIZE];
 
 	unsigned long fileSize; 
-	int count = 0;
 	int len, bytesleft, n;
 	int total = 0;        	// how many bytes we've sent
 
@@ -264,7 +263,6 @@ int sendFile(char* fileName, char* host, char* port) {
         if (n == -1) { break; }
         total += n;
         bytesleft -= n;
-        count++;
 
         //printf("line: %s\n", fileLine);
         memset(fileLine, '\0', sizeof fileLine);
@@ -272,9 +270,6 @@ int sendFile(char* fileName, char* host, char* port) {
 
     sleep(1);							//let last packet arrive before "@@"			
    	send(q_fd, "@@", 3, 0);				//"@@" lets client know this is the end of the transfer 
-    printf("%d bytes sent. Total = %d in %d send()s. %d bytes left to send.\n", n, total, ++count, bytesleft);
-    
-    //printf("@@\n");
 
     fclose(requestedFile);
 	close(q_fd);
@@ -343,7 +338,6 @@ int handleRequest(int new_fd, char* clientHost) {
 		//send error message if not found 
 		if (!findFile(fileName)) {
 			fprintf(stderr, "File not found. Sending error message to %s:%s\n", clientHost, dataPort);
-			printf("%s\n", errorMessage);
 
 			send(new_fd, errorMessage, strlen(errorMessage), 0);
 			return 1; 
@@ -353,20 +347,14 @@ int handleRequest(int new_fd, char* clientHost) {
 			//get ok to connect to data socket 
 			memset(buffer, '\0', sizeof buffer);
 			while (strcmp(buffer, "ok") != 0) {
-				printf("msg from client: %s\n", buffer);
 				memset(buffer, '\0', sizeof buffer);
 				recv(new_fd, buffer, BUFFER_SIZE - 1, 0);	
 			}
-			
-			printf("msg from client: %s\n", buffer);
+
 			//send file to client 
 			printf("File \"%s\" requested on port %s.\n", fileName, dataPort);
 			if (sendFile(fileName, clientHost, dataPort) == -1 ) { fprintf(stderr, "error: send file\n"); return 1; }
 		}
-		/*} else {
-			fprintf(stderr, "error: missing file name\n");	
-			return 1; 
-		}*/
 	} else {
 		fprintf(stderr, "error: invalid command\n");
 		return 1;
