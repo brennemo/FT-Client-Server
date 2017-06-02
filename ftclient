@@ -127,6 +127,15 @@ def isDuplicateFile(fileName):
 	dir = os.listdir('.')
 	return fileName in dir
 
+def sigint_handler(signal, frame):
+    """
+    sigint handler for closing server program cleanly 
+    """
+    print "\nexiting ftclient"
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, sigint_handler)
+
 if __name__ == "__main__":	
 	#validate command line parameters 
 	if checkArgs(sys.argv):
